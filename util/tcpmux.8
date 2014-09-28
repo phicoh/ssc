@@ -1,0 +1,37 @@
+.TH TCPMUX 8
+.SH NAME
+tcpmux \- trivial TCPMUX server
+.SH SYNOPSIS
+.B tcpmux
+.I service
+.I executable
+.I argv0
+.RI [ argv1 ]...
+.SH DESCRIPTION
+This program implements the TCPMUX protocol (RFC-1078) for one service.
+In the TCPMUX protocol services are demultiplexed using ASCII strings
+instead of using port numbers as is normal for TCP.
+The 
+.I service
+argument is the name of the service.
+When the peer requests the supported service, 
+.B tcpmux
+sends positive reply (according to the TCPMUX protocol) and executes
+.I executable
+with arguments
+.I argv0
+and the optional arguments 
+.IR argv1 ,
+etc.
+If the peer requests an unsupported service, 
+.B tcpmux 
+sends a negative reply and exits.
+This is a simple helper program that is typically used with 
+.BR tcpd (8).
+.SH "SEE ALSO"
+.BR tcpd (8).
+.SH AUTHOR
+Philip Homburg
+
+.\"
+.\" $PchId: tcpmux.8,v 1.1 2005/05/13 10:04:22 philip Exp $

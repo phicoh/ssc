@@ -1,0 +1,79 @@
+Client authentication with passwords
+
+There are four basic techniques for authentication using a (relatively)
+weak password:
+1) using a plain-text password
+2) using challenge/response
+3) using an "Encrypted Key Exchange"-like protocol (EKE)
+4) using an SRP-like protocol (SRP)
+
+The first two approaches are a trade-off between network security and
+server security. Sending a plain-text password over a network is secure
+only if the network connection is secure (i.e., the network connection
+is encrypted, and the server is authenticated before the client sends the
+password). In a system using plain-text passwords, the password file on the
+server typically stores the hash of the password instead of the password
+itself. 
+
+If, somehow, the password file on the server is stolen, the attacker still
+has to mount a dictionary attack to recover any passwords. Users can increase
+their own security be selecting good passwords. On the other hand, a
+successful attack on the network directly reveals the user's password.
+
+In a challenge/response system, the situation is reversed. What gets sent
+over the network is typically the result of some computation based on a
+random number (a nonce) and the password. An HMAC operation is a good example,
+but encryption using a strong cipher works as well. An attacker who manages
+to record a challenge and the corresponding response has to mount a
+dictionary attack to recover the password. 
+
+However, the server has to store the plain-text passwords (to be able to
+perform the same operation to verify the response). A successful attack
+on the server typically reveals all passwords.
+
+An EKE protocol can be seen as an extension to the challenge/response system.
+The basic idea behind EKE protocols is that the network protocol does not
+leak enough information to allow a dictionary attack. This means that a
+single shared password is sufficient to authenticate both parties (the
+client and the server). EKE protocols have the same disadvantage as a
+challenge/response systems when it comes to server security: the server has
+to store password in plain-text. A further disadvantage is that EKE protocols
+are very tricky and there may be some patents issues.
+
+SRP is an extension to EKE which does not store a plaintext password.
+It is tricky and there may be patent issues. Is it stable enough?
+Unfortunately, SRP as described in RFC 2945, does not include server
+authentication. As a result of an SRP key exchange, the user learns that
+the server he connected to knows the verifier of his password (a verifier
+is equivalent to a hash, but has the special properties that are needed
+by the SRP protocol). As a result, everybody who can get the list of
+verifiers can impersonate the server.
+
+If the server is authenticated through some other mechanism, we can just as
+well use plain-text password authentication over a secure channel.
+On the other hand, if the list of verifiers has to be kept secret, it is
+not clear if SRP has much to offer over EKE or challenge/response.
+
+Conclusion
+
+Plain-text passwords are attractive because server-side security is higher
+than in the other two approaches. Authenticating the server can be as simple
+as storing a fingerprint of the server's public key (or a per user server
+public key) on a piece of paper and verifying it before logging in.
+
+Storing passwords in plain text on the server is a bad idea unless the
+server is very secure. People often use the same password on multiple systems.
+A list of passwords for a large group people that gets stolen creates a huge
+security problem. Stealing a password may not leave any traces, this in
+contrast to active attacks on Diffie-Hellman protocols.
+
+Challenge/response systems allow mutual authentication at the expense of
+risking a dictionary attack. EKE protocol avoid the risk of a dictionary
+attack at the expense of protocol complexity and patents.
+
+SRP is a good compromize: lack of server authentication does not result
+in serious security problem as is the case in the plain-text password scheme.
+On the other hand, passwords are not stored in plain text on the server.
+Security of the protocol and patents are major issues.
+
+$PchId: sc-pw.txt,v 1.4 2005/05/31 16:27:29 philip Exp $

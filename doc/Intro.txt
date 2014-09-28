@@ -1,0 +1,29 @@
+Introduction 
+
+This document provides an introduction to the various design and protocol
+description documents that can be found in this directory.
+
+An overview of the software engineering aspects of using the secure channel
+in applications is given in "sc-se.txt".
+
+Various ways of dealing with password based login are described in "sc-pw.txt".
+
+The design of the Simple Secure Channel protocol is described in
+"sc-design.txt".
+
+The underlying symmetric key protocol SKSC is described in "sksc-prot.txt".
+
+A more detailed description of the Secure Channel protocol is given in 
+"sc-prot.txt".
+
+An analysis of how the secure channel client should deal with the server's
+public keys is given in "server-keys.txt".
+
+Finally, the documents "sscrcp.txt", "sscrsh-prot.txt", and
+"ssctelnet-prot.txt" described respectively the remote file tranfer, the
+remote command execution, and the remotelogin protocols on top of the
+secure channel protocol.
+
+
+
+$PchId: Intro.txt,v 1.1 2005/06/01 08:58:25 philip Exp $

@@ -1,0 +1,79 @@
+.TH SSCTELNET 1
+.SH NAME
+ssctelnet \- remote login using a secure channel
+.SH SYNOPSIS
+.B ssctelnet
+.RB [ -e 
+.IR esc-char ]
+.RB [ -l
+.IR user ]
+.RB [ -o
+.IR options ]
+.I hostname
+.SH DESCRIPTION
+This program connects to 
+.I hostname
+using the
+.BR sscclient (8)
+program.
+When the connection is established, the normal telnet option negotiations
+are executed. 
+
+During the login session, two escape sequences are recognized.
+An escape sequence start with the escape character immediately after
+a newline. The default escape character is the tilde (`~'), see also the
+.B -e
+option.
+An escape character followed by a period (`.') immediately terminates the
+connection. A hash (`#') cause a telnet break command to be sent (which
+typically interrupts a program running on the remote system).
+The escape character followed by another one can be used to enter the
+escape character at the start of a line.
+Any other combination causes the escape character and the following character
+to be passed a regular input to the remote system.
+.SH OPTIONS
+.TP
+.B -e \fIesc-char
+Change the escape character from the default (tilde, `~') to a different
+character.
+.TP
+.B -l \fIuser
+This option specifies the remote user.
+If no user is specified, the
+.B sscclient 
+program will try to login using the name of the local user.
+.TP 
+.B -o \fIoptions
+These options are passed directly to
+.BR sscclient (8).
+Options enable, for example,  password authentication and insecure connections.
+.SH ENVIRONMENT
+.TP 10
+.B TERM
+The terminal type that is passed in the terminal type option.
+.SH "SEE ALSO"
+.BR sscclient (8).
+.SH NOTES
+The only interesting option that is implemented is the terminal type option.
+At least the window size and the X11 display location options should be
+added.
+
+The 
+.B sscclient
+program is started by 
+.B ssctelnet
+to setup a secure connection.
+First, the current path is searched for 
+.BR sscclient .
+If that fails, an attempt is made to execute
+.BR /usr/local/sbin/sscclient .
+.SH
+.TP
+/usr/local/sbin/sscclient
+fallback path for 
+.BR sscclient (8)
+.SH AUTHOR
+Philip Homburg
+
+.\"
+.\" $PchId: ssctelnet.1,v 1.1 2005/05/20 09:09:42 philip Exp $

@@ -1,0 +1,201 @@
+Introduction
+
+This document describes a simple protocol that allows a process on one
+machine to securely request a service on another machine. 
+
+The process that requests the service is called the client. The process
+that provides access to the service is called the server. We assume
+that the server has a public key and that the client knows that key.
+We also assume that the server has, for each service, a list of public
+keys of clients that are authorized to use that service.
+
+The protocol consists of five phases:
+1) Protocol version negotiation
+2) Diffie-Hellman key agreement
+3) Authentication and access control
+4) Forwarding of communication for the requested service
+5) Shutdown
+
+Messages
+
+Message 0: Connection setup
+
+The client sets up a TCP/IP connection to the server on port 1 (TCPMUX,
+RFC-1078), requesting TCPMUX service 'sscp'.
+
+Message 1: Protocol version (server)
+
+Direction: Server to client
+Transport: TCP/IP
+
+The server sends the version number of the protocol it intends to use to
+the client.
+
+Message 2: Protocol version (client)
+
+Direction: Client to server
+Transport: TCP/IP
+
+The client sends the version number of the protocol it intends to use
+to the server, or a failure indication.
+
+Message 3: DH parameters
+
+Direction: Client to server
+Transport: TCP/IP
+
+The client sends the requested size of the modulus to the server.
+The client also sends to maximum SKSC message length that is supported.
+
+Message 4: DH server public key
+
+Direction: Server to client
+Transport: TCP/IP
+
+The server sends either a failure indication or the modulus, the sub-group
+size, the generator, and the the server's DH public key.
+In additional, the server sends its maximum SKSC messsage length, which should
+be less than or equal to the client's maximum.
+
+Message 5: DH client public key
+
+Direction: Client to server
+Transport: TCP/IP
+
+The client sends the client's DH public key.
+
+Message 6: Server authentication
+
+Direction: Server to client
+Transport: Symmetric Key Secure Channel (SKSC) over TCP/IP
+
+The server concatenates all messages sent and received so far, and signs the
+result using his RSA private key. The server sends his public key and the
+signature.
+
+Message 7: Client authentication
+
+Direction: Client to server
+Transport: SKSC over TCP/IP
+
+The client concatenates all messages up to and including message 5 (the
+same data as is used by the server in message 6), and signs the result using
+his RSA private key. The client sends his public key and the signature
+
+Message 8: Client service request
+
+Direction: Client to server
+Transport: SKSC over TCP/IP
+
+The clients sends the name of a login account at the server and the name of
+a service.
+
+Message 9: Remote user signature
+
+Direction: Server to client
+Transport: Symmetric Key Secure Channel (SKSC) over TCP/IP
+
+The server concatenates all messages up to and including message 5, and
+signs the result using the requested user's RSA private key. The server
+sends the user's public key and the signature.
+
+Message 10: Password
+
+Direction: Client to server
+Transport: SKSC over TCP/IP
+
+The clients sends the password for the remote account.
+
+Message 11: Access status
+
+Direction: Server to client
+Transport: Symmetric Key Secure Channel (SKSC) over TCP/IP
+
+The server informs the client whether access is granted or not.
+
+Message 12: User data
+
+Direction: both
+Transport: SKSC over TCP/IP
+
+Data that is forwarded by the client to server as input to the service or
+output of the service forwarded from the server to the client.
+
+Message 13: Shutdown
+
+Direction: both
+Transport: SKSC over TCP/IP
+
+We can asssume that the SKSC has a shutdown mechanism. This protocol does
+not add anything extra.
+
+============================================================
+
+Security analysis
+
+Passive attack
+
+The attacker can learn which client machine contacts which server machine,
+which protocol versions the client and the server use and which DH parameters
+the client and the server use.
+
+Assuming the attacker cannot break DH or the SKSC, the identity of the
+client and the requested login and service remain secret.
+
+Active attack
+
+First we assume that the client and the server know each other's public keys.
+We assume that the keys are strong enough that signatures cannot be forged.
+
+The attacker has two options: modify the public parameters of the connection 
+and perform a DH relay (man-in-the-middle) attack.
+
+First we look at the situation from the client's point of view. The client
+aborts the connection if the server's signature in message 6 does not match.
+The server's signature does not match in both cases: modifying the
+security parameters results in the client and the server having different
+views. A DH relay attack also results in different views at the server
+and the client.
+
+Note that if the client does not check the DH prime, sub-group and generator,
+the SKSC may not be secure. However, the first message that is sent over
+that channel is the server's signature. Verification of the signature will
+fail and the client aborts the connection.
+
+From the point of view of the server we get a similar result. The server
+cannot check the client's signature until message 8 (the attacker can sign
+using his own key, and the server doesn't know which key is valid until
+it verifies whether the client is authorized or not.).
+
+The attacker cannot force the server to use insecure parameters because
+the parameters of the DH group are selected by the server itself.
+The attacker cannot use a DH relay attack because that requires forging the
+clients signature on the attackers DH public key.
+
+Note that from the server's point of view, the client's signature is always
+fresh: the server selects secure DH parameters and a fresh DH private key.
+The client signs data that includes the servers public key.
+
+We can assume that the server always knows the client's public key because
+the client's key is used for access control. However, the client may be
+tempted to setup a connection even when he is not sure about the server's
+public key.
+
+If the client doesn't know the servers public key we get the following:
+The attacker can use an arbitrary weak DH group and can break the security of
+the SKSC. This doesn't matter because without knowledge of the server's
+public key, the attacker can try fool the client by pretending to
+be the server anyway.
+
+However, the client's signature will never convince the real server. This
+means that the attacker can impersonate the server, but cannot execute
+a relay attack. The attacker can collect the clients secrets as long as the
+attacker can successfully impersonate the server.
+
+The situation is much worse if the client uses password authentication:
+if the client sends the password to the attacker then the attacker can
+succesfully impersonate the client. Password authentication should not
+be used at all and if it has to be used, it should be used after the
+public key of the server has been learned through some other channel.
+
+$PchId: sc-design.txt,v 1.2 2005/05/31 15:36:51 philip Exp $

@@ -1,0 +1,92 @@
+.TH SSCSERVER 8
+.SH NAME
+sscserver \- secure connection daemon
+.SH SYNOPSIS
+.B sscserver
+.SH DESCRIPTION
+This program provides the service side of a secure connection.
+After authentication, the request service is started on behalf of the
+requested identity.
+Typically,
+.B sscserver
+is started by
+.BR tcpmux (8)
+or a version of 
+.BR inetd (8)
+that supports the TCPMUX protocol (RFC-1078).
+
+Authentication is performed using one or two RSA key.
+The private host key, which is always used, is stored in the file
+.B /etc/ssc/host-priv 
+(see 
+.BR rsagen (1)
+for generating RSA keys).
+Optionally, the user can have a private key as well. 
+This key is to be stored in the file
+.BR ~\fIuser\fB/.ssc/key-priv .
+
+The 
+.B sscserver
+program accepts two forms of authentication.
+The first form is password authentication.
+The user's password is received over the network, is encrypted, and is
+compared to the encrypted password that is stored in the password file.
+Access is granted when the encrypted password matches with the one stored
+in the password file.
+
+The second form of authentication is based on RSA.
+The public key that is used for the signature is hashed and compared to
+the list of authorized keys in the file
+.BR ~\fIuser\fB/.ssc/client-keys .
+This file contains a list of hashes of RSA public keys as described in
+.BR rsagen (1).
+Access is granted when the hash of the public key is listed.
+
+After access control, the requested service is looked up in the file
+.BR /etc/ssc/services .
+This file has one line per service, and each line has four or more fields.
+The first field is the name of the service.
+The second field is either a hyphen (``--'') or the keyword
+.BR pty .
+This keyword directs
+.B sscserver
+to allocate a pseudo terminal for the service.
+Login records are written in
+.B utmp
+and 
+.B wtmp.
+An open filedescriptor for the pty device is passed to the service.
+
+The third field is path name of the executable. The fourth and optional
+other fields are the argument, starting with the name of the program.
+When the 
+.B pty
+option is used, 
+.B sscserver
+adds two more arguments: the number of the pty fieldescriptor and the name
+of the corresponding terminal.
+The program 
+.BR ssc_runas (8)
+is used to change the UID to that of the requested user in a safe fashion.
+
+.SH FILES
+.TP
+/etc/ssc/host-priv
+RSA private key of the host.
+.TP
+.B ~\fIuser\fB/.ssc/client-keys
+Hashes of RSA public keys that are allowed access.
+.TP
+.B ~\fIuser\fB/.ssc/key-priv
+The user's private key.
+.TP
+.B /etc/ssc/services
+List of services and command to execute for the service.
+.SH "SEE ALSO"
+.BR rsagen (1),
+.BR ssc_runas (8).
+.SH AUTHOR
+Philip Homburg
+
+.\"
+.\" $PchId: sscserver.8,v 1.2 2005/06/01 10:12:17 philip Exp $

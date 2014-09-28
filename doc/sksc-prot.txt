@@ -1,0 +1,111 @@
+Symmetric Key Secure Channel
+
+Introduction
+
+The Symmetric Key Secure Channel (SKSC) protocol is a relatively simple
+protocol that allows transmission of data from a sender to one or more
+receivers that all share a single key. The protocol supports confidentiality,
+integrity, and replay detection.
+
+It is assumed that this protocol is used in conjuction with other protocols
+that perform key distribution and authentication.
+
+The Basics
+
+The protocol provides a simplex channel: a single sender can send data to
+one or more receivers. A full-dublex channel between two parties can be
+created by running this protocol twice.
+
+The protocol consists of two layers. The lowest layer performs encryption
+using a shared key and provides confidentiality. The upper layer is a
+message authentication code (MAC), which also uses a shared key, and
+provides both message integrity and replay dection.
+
+Encryption
+
+Both the plaintext of the message and the MAC are encrypted using the
+AES cipher in Cipher Feedback (CFB) mode. The string that is encrypted
+consists of the MAC followed by the plaintext. The initialization vector (IV)
+is constant and zero. A 256-bit key should be used.
+
+This mode of encryption does not provide a way to detect message boundaries.
+It is the responsibility of the user of this protocol to keep track of
+message boundaries. For example by prepending the length of the ciphertext.
+
+Message Authentication Code
+
+The message authentication code uses CBC-MAC with AES. For this protocol,
+CBC-MAC is defined as follows: the input to the CBC-MAC function is padded
+by first adding a '1' bit to the input followed by as many '0' bits to
+get a message that is an integral multiple of the block size of the
+underlying cipher (128 bits for AES). The message is encrypted in CBC mode
+with a zero initialization vector.  The last ciphertext block is the MAC.
+The MAC key is used as the AES key for encryption.
+
+[Note: in general CBC-MAC is secure only for fixed length messages!]
+
+For this protocol, the plaintext input to the CBC-MAC consists of a message
+number followed by the plaintext of the message. The message number is a
+64-bit value that incremented for each message sent. For the purpose of the
+CBC-MAC, the message number is stored in 8 octets in big-endian mode.
+
+The message number can be maintained by the user of this protocol or can
+be implicit in the implementation (see the "Implementation Notes")
+
+The same 256-bit key should be used as is used for encryption.
+
+Security Analysis
+
+In general, CFB mode with a fixed IV is not secure. For each message sent,
+one block may leak to a passive attacker. In this protocol, the block that is
+leaked is the MAC. In general, two different plaintexts have a different MAC,
+so the MAC functions as a random IV. For this protocol, the message number
+ensures that even sending the same plaintext twice results in different
+MACs and therefore in different ciphertexts.
+
+In CFB mode, a collision in the ciphertext blocks leaks information about
+plaintext blocks. For a cipher with a 128 bit block size (such as AES), we
+can expect collisions after encrypting 2**64 blocks (** denotes exponentiation)
+with a single key. For this reason a 64 bit message number is used in the 
+MAC. At the moment, it is unlikely that a single sender will encrypt
+2**64 blocks with a single key. Note that a collision does not leak the
+actual plain text but a relationship between two plaintext blocks.
+
+The key size of this protocol is 256 bits. This both prevents collisions
+in the key space and it is the safest mode of AES (longer keys get more
+rounds).
+
+In general, the CBC-MAC is not secure for variable sized messages. Message
+extension attacks are easy. In this protocol, additional data has to be
+excrypted as well. Using the same key for the CBC-MAC as is used for
+encryption should not be a problem. In the worst case, the amount of data that
+is encrypted under a single key is doubled.
+
+If (by accident) a key is re-used, then the only information that is leaked
+is whether the second time message number n is used, the contents was exactly
+the same contents as the first time. Of course, replay detection does not
+work if a key is re-used.
+
+Implementation Notes
+
+If this protocol is used on top of a reliable (octet) stream, it is 
+suggested that the implementation starts with message number one and keeps
+the message number implicit. If a message is received with a bad MAC,
+then the receiving side should stop accepting new messages. This gives an
+attacker exactly one chance to insert a fake message.
+
+For an unreliable (datagram) protocol, the user of this protocol will have 
+to encode the message number explictly. It is suggested that the user of
+this protocol sorts messages based message number (optionally with a timeout
+to skip dropped messages) and that the implementation of receiver simply
+checks that message numbers form a monotonously increasing sequence. 
+Again, the receiver should stop accepting new message after a message with
+a bad MAC has been received. In general the underlying datagram service
+already protects against accidental data corruption.
+
+Test Vectors
+
+[to be done]
+
+#
+# $PchId: sksc-prot.txt,v 1.3 2005/05/31 14:39:04 philip Exp $

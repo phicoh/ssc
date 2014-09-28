@@ -1,0 +1,8 @@
+Simple Secure Channel (SSC) Telnet Protocol
+
+This protocol runs the normal telnet protocol on top of the SSC protocol.
+The main difference is that SSC does not support urgent data. Any reference
+to urgent data in the telnet RFCs should be ignored.
+
+
+$PchId: ssctelnet-prot.txt,v 1.1 2005/05/31 14:17:31 philip Exp $

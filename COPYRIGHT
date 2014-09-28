@@ -1,0 +1,37 @@
+Most files are written by Philip Homburg for NAH6.
+
+Exceptions are:
+
+lib/sha2/sha2.c:
+lib/sha2/sha2.h:
+Copyright 2000 Aaron D. Gifford
+
+lib/mp:
+Jack Lacy, Don Mitchell and Matt Blaze
+
+include/rijndael.h:
+Kees J. Bot
+
+lib/os/minix/strlcat.c:
+lib/os/minix/strlcpy.c:
+Todd C. Miller
+
+lib/hmac/hmac_sha256.c:
+lib/hmac/hmac_sha256.h:
+lib/sksc/sksc.c:
+lib/sksc/sksc.h:
+ssctelnet/ssctelnet.c:
+ssctelnet/ttn.h:
+ssctelnet/ttn_conf.c:
+ssctelnetd/ssctelnetd.c:
+include/telnet.h:
+Philip Homburg
+
+sscrcp/match.c:
+Erik Baalbergen
+
+lib/rijndael:
+Antoon Bosselaers, Vincent Rijmen, Paulo Barreto, and Kees Bot
+
+
+$PchId: COPYRIGHT,v 1.1 2005/06/01 10:21:10 philip Exp $

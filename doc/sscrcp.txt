@@ -1,0 +1,60 @@
+This document describes a simple remote file tranfer protocol that is designed
+to be use on top of the Simple Secure Channel (SSC) protocol.
+
+The client connects to the server using the SSC protocol and requests protocol
+"rcp".
+
+In general, messages start with a four octet header, which is followed
+by message specific data. The header consists of two fields. The first
+field is a 2 octet, 16-bit value (all values are transmitted in big-endian
+mode) that contains the length of the message (including the header).
+The second field is again a 2 octet, 16-bit value, which contains the
+message type.
+
+The following command can be sent by the client: GET, PUT, GETMODE, GETTIMES,
+SETMODE, SETTIMES, LISTDIR, and QUIT.
+The PUT command is followed by a sequence of CDATA messages and is 
+terminated with either a COK message or a CERROR message.
+
+The server's response to a GET command is a sqeuence of SDATA messages
+followed by either an SOK message or an SERROR message.
+The server's response to a LISTDIR command is sequence of DIRENTRY messages
+again followed by either an SOK message or an SERROR message.
+The server sends MODE_REPLY and TIMES_REPLY as response to respectively
+the commands GETMODE and GETTIMES. Other commands (SETMODE, SETTIMES, and
+QUIT) get an SOK as a reply message. When the server encounters an error,
+it sends an SERROR message.
+
+A stream of messages (CDATA, SDATA, or DIRENTRY) can be aborted by the
+other side by sending a CCANCEL or a SCANCEL message. The sending side
+is expected to stop the stream and end with a CERROR or an SERROR message.
+
+(The set of message is not complete, additional message may be required for
+creating directories, and for returning user and group information).
+
+============================================================
+GET command:
+
+C->S:	GET <filename>
+S->C:	SOK or SERROR
+if SOK:
+	(zero or more times)
+	S->C:	SDATA
+	S->C:	SOK or SERROR
+asynch:
+	C->S:	CABORT
+
+============================================================
+PUT command:
+C->S:	PUT <filename>
+S->C:	SOK or SERROR
+if SOK:
+	(zero or more times)
+	C->S:	CDATA
+	C->S:	COK or CERROR
+	S->C:	SOK or SERROR
+asynch:
+	S->C:	SABORT
+
+
+$PchId: sscrcp.txt,v 1.1 2005/06/01 08:50:54 philip Exp $

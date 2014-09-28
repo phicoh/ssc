@@ -1,0 +1,58 @@
+This document described how the client should handle the server's signatures
+and public keys.
+
+The server sends one or two signatures with associated public keys. A signature
+with the server's host key is always present. If the remote user has its own
+public/private key pair, a second signature is sent. Associated with each
+signature is the public key that can be used to verify the signature.
+
+In the ideal situation, two signatures are present that are valid when
+checked with the associated public keys, and the client knows that the
+public keys belong to the remote host and the remote user.
+
+The question is, what should happen when the situation is less than perfect.
+There are two separate issues. The first issue is whether the signatures are
+correct or not. The second issue is whether the right keys are used to sign
+and whether the client knows those keys to be valid.
+
+Dealing with invalid signatures is easy: the connection should be aborted.
+An invalid signature is a protocol violation. A bad signature is either an
+implementation or a communication error. In both cases there is no reason
+to continue.
+
+For each key we basically have three possibilities:
+1) The client does not know a key for the remote host or remote user. This
+   is called "unknown".
+2) The client knows a key, but the server used a different key. This is called
+   "mismatch".
+3) The client knows a key and the server used that key for the signature.
+   This is called "valid".
+
+The remote user may not have a key. In that case, there are two additional
+possibilities:
+4) The client does not now a key for the remote user. For the security 
+   analysis, this is grouped together with possibility 1 ("unknown").
+5) The client knows a key for the remote user. This is grouped together with
+   possibility 2 ("mismatch").
+
+There are two keys and for key there are three results (unknown, mismatch, and
+valid). We give the highest priority to a "mismatch". If either of the two
+keys does not match, we consider the connection insecure. If both keys are
+unknown, we also consider the connection insecure. If both keys are valid
+or one key is valid and the other key is unknown, then the connection is
+considered secure.
+
+User interface
+
+The first question is whether the client should continue with an insecure
+connection or not. When the client uses a signature for authentication,
+simply asking the user should be sufficient. On the other hand, sending
+passwords over an insecure connection should be discouraged. 
+
+The issue step is whether the client program should add, delete, or modify
+keys. Only adding keys are prompting the users is a reasonable approach:
+adding keys is relatively safe (not much chance of damaging the file) and
+easy to implement (just append the keys at the end).
+
+
+$PchId: server-keys.txt,v 1.1 2005/05/31 17:01:07 philip Exp $

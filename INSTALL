@@ -1,0 +1,24 @@
+1) Copyling
+
+make
+
+2) Installing
+
+make install
+
+3) Generate host key
+
+as root:
+# mkdir /etc/ssc
+# rsagen 2048 /etc/ssc/host-priv /etc/ssc/host-pub
+
+4) Generate private key
+
+rsagen -h 2048
+
+5 Start daemon as
+
+tcpd tcpmux tcpmux sscp /usr/local/bin/sscserver sscserver
+
+
+$PchId: INSTALL,v 1.1 2005/06/01 10:22:26 philip Exp $

@@ -1,0 +1,39 @@
+.TH SSCTELNETD 8
+.SH NAME
+ssctelnetd \- server for remote login
+.SH SYNOPSIS
+.B ssctelnetd
+.RB [ -bd ]
+.I pty-fd
+.I tty-name
+.SH DESCRIPTION
+This program is started by the
+.BR sscserver (8)
+program to handle the service ``telnet''.
+The program that starts
+.B ssctelnetd
+has to allocate a pseudo tty.
+An open ``pty'' filedescriptor is passed and the number of the filedescriptor
+is passed as a command-line argument.
+The file name of the corresponding terminal is also passed on the command line.
+
+Encryption and authentication is handled by
+.BR sscserver .
+.SH OPTIONS
+.TP
+.B -b
+Enable strict processing of the CR-LF sequence.
+.TP
+.B -d
+Enable debug output.
+.SH "SEE ALSO"
+.BR sscserver (8).
+.SH ENVIRONMENT
+.TP 10
+.B USER
+The login name of the user.
+.SH AUTHOR
+Philip Homburg
+
+.\"
+.\" $PchId: ssctelnetd.8,v 1.1 2005/05/23 12:50:17 philip Exp $

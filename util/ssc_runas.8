@@ -1,0 +1,34 @@
+.TH SSC_RUNAS 8
+.SH NAME
+ssc_runas \- simple helper program to run a command as a different user
+.SH SYNOPSIS
+.B ssc_runas
+.I user
+.I executable
+.I argv0
+.RI [ argv1 ]...
+.SH DESCRIPTION
+This program looks up the argument
+.I user
+in the password file, changes it's user and group id (and on some
+platforms the supplemantary group ids as well) and executes 
+.I executable
+with arguments
+.I argv0
+and the optional arguments 
+.IR argv1 ,
+etc.
+This is a simple helper program for
+.BR sscserver (8)
+to make sure that the address space of the
+.B sscserver
+process is released before
+.BR setuid (2)
+is called.
+.SH "SEE ALSO"
+.BR sscserver (8).
+.SH AUTHOR
+Philip Homburg
+
+.\"
+.\" $PchId: ssc_runas.8,v 1.1 2005/05/13 10:03:37 philip Exp $

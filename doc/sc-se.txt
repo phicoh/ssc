@@ -1,0 +1,170 @@
+Secure Channel -- Software Engineering Aspects
+
+This documents describes the design aspects of the secure channel that
+are not related to the cryptography that is used.
+
+The basic model is that all cryptography is completely encapsulated in
+a client and a server process. The client process sets up a network connection
+to the server process. The client and the server establish a secure
+(encrypted and authenticated) channel. The client provides a bi-directional
+byte stream to a local process needs a secure connection to the server.
+Likewise, the server process provides a bi-directional byte stream to the
+process that implements the requested service.
+
+The design of the client is quite different from the design of the server.
+The client is much simpler, so we will start with the client.
+
+The Client
+
+When the secure connection is established we have two processes running:
+the process that implements the secure channel, which we call the client, 
+and the process that requires the secure channel to access a remote service.
+We will call this process the application.
+
+The application and the client communicate using two pipes (in general,
+pipes are not bi-directional). The client reads data from filedescriptor 0
+and sends that data over the secure channel. Data arriving over the
+secure channel is sent to filedescriptor 1. The application attaches the
+two pipes to two free file descriptors.
+
+Given that the application uses the client to set up a secure channel, it
+makes sense for the application to start the client. In theory, the client
+can also start the application. However, this requires the user to tell
+the client which application has to be started. The other way around, the
+user just start the application, and the use of the secure channel remain
+(mostly) hidden.
+
+To set up a secure connection, the client may have to communicate with the
+user, for example to ask for a password. There are two options. The first
+one is to use /dev/tty. The second one is to define a protocol that lets
+the application communicate with user.
+Both approaches have advantages and disadvantages. The advantage of /dev/tty
+is that it is easy to implement and does not complicate the interface between
+the client and the server. The disadvantage is that controlling tty is
+required. In a windowing system, graphical application may not have a
+controlling tty. (Note that the application can set up a controlling tty
+for the client).
+Defining a protocol between the client and the application is complicated
+by the fact that local echo has to be turned off when the users enters a
+password, but should be kept on when the user answers other questions.
+
+When the application starts the client, it has to provide the client with
+the following information:
+- the remote hostname
+- optionally, the remote port
+- the desired service 
+- the desired login
+- the authentication mechanism (RSA, plain text password, hashed password,
+  maybe EKE)
+
+We need a way to let the client report (fatal) errors to the client. The
+application also needs to know when the secure channel is ready. An solution
+is to let the client send a status string back to the application when
+the secure channel has been established or when a fatal error occurred.
+The clients sends an empty null terminated string (just a null byte) to 
+report success and an error message to report a fatal error. Other errors
+or diagnostics can be sent to standard error (filedescriptor 2).
+
+It is not clear how the application should tell the client that it wants
+to shutdown the connection. Just closing the pipe that provides the input
+the to client cannot be distinguished from a crashed application.
+One option that might work is for the client to check its parent process
+identifier after it detects end of file on the pipe: a ppid equal to 1
+implies that its parent is gone.
+
+A similar problem occurs when the client wants to report an end of file
+that it received over the network. Closing standard out is not sufficient.
+The application can check that the client still exists by sending a null
+signal. (Due to the lack of a select call under Minix, both the application
+and the client has to fork. This results in four processes. Those processes
+have to be connected in the right way.)
+
+The server
+
+At the server side, we also have two processes: the server, which implements
+the server side of the secure connection, and the service, which provides
+the application with the requested service.
+
+At the client side, the issue of whether the client start the application or
+vice versa is does not have serious security implications.
+
+This is different at the server side. There are two main issues: 1)
+the requested service maybe encrypted and 2) a server may support multiple
+local users. Both issues will be discusses in turn.
+
+The client can specify the desired service in two different ways: external
+to the secure channel and by sending the requested service encrypted over the
+secure channel (there some minor various and combinations possible that
+will be ignored in this discussion). Service selection can be kept external
+to the secure channel by, for example, assigning different TCP ports to
+different services.
+
+The advantage of encrypting the requested service is that traffic analysis
+does not (directly) result in any information about services that are used 
+by a particular client machine. When the service is encrypted, the server
+process has to accept connections for all services. It is obvious that in
+this case the server has to start the service.
+
+To handle the second case (multiple users) the first process is typically
+started with additional privileges (root on Unix systems) and switches
+to one particular set of credentials after access has been granted to the
+client.
+
+In this case, having the server start the service is better for three
+reasons:
+1) Only the server has to be started as root. The server can start the
+   service with the appropriate user id. This has the advantage that the
+   service does not have to do anything special.
+2) If the service would start out as root, the server would have to
+   communicate the requested user id back to the service. Which leads to a
+   more complicated interface.
+3) When the server starts the service, it is possible that the (local)
+   user supplies its own implementation of the service.
+
+Both issues suggest that it is best to have the server start the service.
+
+Service implementation issues
+
+We can divide services in three different groups:
+1) File transfer
+2) Command execution
+3) Interactive login
+
+The first category is basically every service that allows a limited set 
+of operations on a possibly limited set of the remote user's objects.
+File transfer is the canonical example, but other examples include mail
+(both retrieval and submission), source control systems, etc.
+
+The second category allows arbitrary command execution. In this case
+every possible operation can be performed on any object the user has access
+to.
+
+To a large extent, the third group is similar to the second group. However,
+on most systems, setting up a login session requires privileged operations
+which complicates the implementation.
+
+For all three groups, there is the issue of accounting and auditing. It is
+not clear what kind of information has to be logged by the server or the
+service. The next question is how the server passed the identity of
+the client and details of the connection to the service.
+
+The implementation of a service in the first group is relatively simple:
+the service accepts requests that arrive over a pipe to filedescriptor 0
+and write replies to filedescriptor 1. The server forwards data from the
+secure channel to a pipe and vice versa. A security question is whether
+the user is allowed to supply his own implementation of a service or not.
+If a user can supply his own implementation, the user can violate the
+distinction between group 1 and group 2.
+
+From an implementation point of view, group 2 is similar to group 1.
+In a Unix environment, standard out and standard error have to be
+multiplexed. Furthermore, it makes sense to forward signals to the
+remote command (this requires multiplexing the input channel).
+
+Group three requires the allocation of a pseudo tty and adding
+login accounting records. The traditional approach is that a login
+daemon (telnetd or rlogind) performs those tasks as root. If the
+service is started with just the user's credentials, it may be
+necessary to create a setuid root helper program for this purpose.
+
+$PchId: sc-se.txt,v 1.1 2005/05/31 15:59:00 philip Exp $

@@ -1,0 +1,65 @@
+.TH RSAGEN 1
+.SH NAME
+rsagen \- Generate a RSA public/private key pair
+.SH SYNOPSIS
+.B rsagen
+.I modulus-length
+.I private-key-file
+.I public-key-file
+.br
+.B rsagen
+.B \-h
+.I modulus-length
+.SH DESCRIPTION
+This program generates a random RSA public/private key pair such that the
+length of the public key (in bits) is equal to 
+.IR modulus-length .
+The new keys are written to the files that are passed as arguments or,
+when the \-h option is used, to the default locations.
+The program uses the random number generator of the underlying operating
+system to seed a pseudo random number generator.
+
+The public key is written in two forms.
+The first form is a line that consists of the string ``RSA3'' followed by
+a space and the public key as a sequence of hex digits.
+
+The second form is an SHA-256 hash of the public key. 
+The public is padded with leading zero bits until the length becomes a
+multiple of 8.
+The public key is then stored in memory as a big endian octet string, without
+any leading zero octets.
+The SHA-256 hash is taken from the resulting octet string.
+The result of the hash is written as a line that consists of the
+string ``RSA3-SHA256'' followed by a space and 64 hex digits.
+
+The private key is stored as a line that consists of the string
+``RSA3-PRIV'' followed by a space, the public key as a sequence of hex
+digits, a colon (``:''), and one of the factors of the public key also
+as a sequence of hex digits.
+.SH OPTIONS
+.TP
+.B -h
+This opion selects $HOME/.ssc/key-pub and $HOME/.ssc/key-priv as the output
+files for respectively the public key and the private key.
+The directory $HOME/.ssc will be created if it does not exist.
+.SH FILES
+.TP
+$HOME/.ssc/key-pub
+default public-key file for the
+.B -h
+option.
+.TP 
+$HOME/.ssc/key-pub
+default private-key file for the
+.B -h
+option.
+.TP 
+/dev/random
+kernel random number generator
+.SH "SEE ALSO"
+.BR random (4).
+.SH AUTHOR
+Philip Homburg
+
+.\"
+.\" $PchId: rsagen.1,v 1.2 2005/06/01 10:20:26 philip Exp $

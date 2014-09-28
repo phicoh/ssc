@@ -1,0 +1,329 @@
+Simple Secure Channel Protocol
+
+Data Encoding
+
+16-bit integer
+32-bit integer
+variable length interer
+variable length string
+
+Aborting Connections
+
+General Message Format
+
+With the exception of the two version messages (meesage 1 and message 2),
+messages in this part of the protocol have a fixed four octet header.
+This first two octets form a unsigned 16-bit integer that specifies the
+length of the message (including the header). The next two octets also
+for an unsigned 16-bit integer that specififies the message type.
+An arbitrary amount of padding may be added to encrypted messages
+(such that the resulting message does not exceed the maximum message size)
+to make traffic analysis more complicated.
+
+This results in the following message for the the first few unencrypted
+messages:
+  0   1   2   3   4
++---+---+---+---+---+- - - -+
+|Length | Type  | Contents  |
++---+---+---+---+---+- - - -+
+
+and for encrypted messages (excluding the details of the SKSC message format):
+  0   1   2   3   4
++---+---+---+---+---+- - - -+- - - - - - - - - - -+
+|Length | Type  | Contents  | (optional padding)  |
++---+---+---+---+---+- - - -+- - - - - - - - - - -+
+
+Message 1 -- Server Protocol Version Number
+
+A version message consists of a four octet identification string followed
+by an unsigned 32-bit version number. The identification string is the
+ASCII text "SSCP", in decimal the characters 83, 83, 67, 80. In the
+version number, the two most significant bytes contain the major
+protocol version, the next byte the minor version, and the least
+significant byte the protocol revision. The protocol described in this
+document has version 1.0.0.
+
+This results in the following message:
+  0   1   2   3   4   5   6   7
++---+---+---+---+---+---+---+---+
+| S | S | C | P | 0 | 1 | 0 | 0 |
++---+---+---+---+---+---+---+---+
+
+The value zero specifies and error condition. If the server cannot continue
+with the version negotiation (or if for some reason the server does not want
+to serve the client) this value can be used to tell the client that the
+protocol will be aborted.
+
+Server Processing
+
+The server sends a version message when the TCP connection is established.
+Furthermore, the server sends a new version message when the client
+proposes a protocol version that is different then the last version
+proposed by the server.
+
+The first version message contains the highest version that is supported
+by the server or zero if the server does not want to serve the client.
+The following version messages contain the highest version supported
+by the server that is less than or equal to the last version offered by
+the client or zero if there is no such version.
+
+After sending a version message with version zero, the server aborts the
+connection (see Aborting Connections). Otherwise, the server expects
+a version message from the client.
+
+Client Processing
+
+The client checks that the version message starts with the identification
+string. If the first four octets are not "SSCP" or if the version is zero,
+the client aborts the connection (see Aborting Connections).
+For the second and later version messages, the client verifies that
+the version number is less than or equal to the last version offered
+by the client. If this is not the case, the client can optionally send a
+version messsage with version zero, and in any case aborts the connection.
+
+Message 2 -- Client Protocol Version Number
+
+The format for this message is the same as message 1.
+
+CLient Processing
+
+After receiving a valid protocol version from the server, the client
+always sends a version message. The invalid messages or version zero,
+the client takes the actions as described in message 1.
+
+The client selects the highest protocol version it supports that is less
+than or equal to the server's protocol version or zero if there is no such
+version. If the client sends version zero, the connection is to be aborted
+(see Aborting Connections).
+
+If the version selected is not equal to the version offered by the server,
+a new round of version negotiation is required. If the version offered
+by the server is acceptable, the protocol moves to message 3.
+
+Server Processing
+
+The server checks that the version message starts with the identification
+string. If the first four octets are not "SSCP" or if the version is zero,
+the server aborts the connection (see Aborting Connections).
+The server verifies that the version number is less than or equal to the
+last version offered to the client. If this is not the case, the server can
+optionally send a version messsage with version zero, and in any case
+aborts the connection. If the version offered by the client is the same as
+the last version that was sent to the client, the protocol moves to
+message 3.
+
+Message 3 -- Client Protocol Parameters
+
+In addition to the header, this message contain two unsigned 32-bit values.
+The first value specifies the maximum number of plaintext bytes in a 
+Symmetric Key Secure Channel (SKSC) message. The second value specifies
+the minimum size (in bits) of the modulus in the Diffie-Hellman protocol.
+In the next message, the server is allowed to reduce the maximum size
+of the SKSC messages and increase the size of the Diffe-Hellman modulus.
+The message type is 3. The lenght of the message is at least 12.
+
+This results in the following message:
+  0   1   2   3   4   5   6   7   8   9  10  11   
++---+---+---+---+---+---+---+---+---+---+---+---+
+|  >=12 |   3   | SKSC max.     | Modulus min.  |
++---+---+---+---+---+---+---+---+---+---+---+---+
+
+Client Processing
+
+The client sends this message immediately after sending a version message
+that is equal to the last version message received from the server. Note:
+for performance reasons (Nagle) it is best to combine the version message
+and this message into a single TCP message.
+
+The client selects a suitable maximum message size for SKSC. A reasonable
+default is 16 kilobytes. The client also selects a minimum for the
+Diffie-Hellman prime modulus. The size should be at least 2048 bits to
+be secure.
+
+Server Processing
+
+The server checks that the version of the message is 3 and that the length
+is 12. If this is not the case the server aborts the connection.
+The server replies to this message with message 4.
+
+Message 4 -- Server Protocol Parameters and DH Public Key
+
+In addition to the header, this message contain one unsigned 32-bit integer
+and 4 variable length integers. The 32-bit integer is the server's value 
+for the maximum number of plaintext bytes in a Symmetric Key Secure
+Channel (SKSC) message. The variable length integers are: the
+modulus of the Diffie-Hellman protocol, the sub-group, the generator, and
+the server's Diffie-Hellman public key. The message type is 4. The
+length is variable but at least 16. The value zero in the maximum message
+size field specifies that the server does not accept the clients maximum
+(too low). The value zero in the modulus specifies that the server does
+not support any modulus which is at least the requested size.
+
+This results in the following message:
+  0   1   2   3   4   5   6   7   8   9  
++---+---+---+---+---+---+---+---+---+---+---+- - -+---+---+---+- - - - - - 
+| >=16  |   4   | SKSC max.     | len 1 | Modulus | len 2 | Sub-group size  
++---+---+---+---+---+---+---+---+---+---+---+- - -+---+---+---+- - - - - - 
+
++---+---+---+- - - -+---+---+---+- - - - -+
+| len 3 | generator | len 4 | public key  |
++---+---+---+- - - -+---+---+---+- - - - -+
+
+Server Processing
+
+For the maximum message size, the server uses the client's value unless
+server's maximum size is smaller than the client's or the client's 
+maximum is too small to be useful. If the client's value is too small,
+the server fills in the value zero and abort the connection after sending
+this message.
+
+The server selects a Diffie-Hellman modulus that at is at least the
+size desired by the client. The error value zero is sent to the client if
+the cleint's requirements cannot be met. The server aborts the connection
+after sending a value of zero. The size of the sub-group prime is fixed
+at 256 bits. The generator MUST generate a group equal to the size of
+the sub-group. The server generate a random number x, computes 
+the generator to the power of x modulo the modulus and sends that value
+to the client as the server's public key.
+
+Client Processing
+
+The client aborts the connection if the type is not 4, if decoding fails or
+if the server returns a zero maximum size or modulus.
+
+In the ideal case, the client should perform a consistency check on the 
+four values: that the modulus is prime, that the sub-group size is prime,
+that the sub-group size divides the modulus minus one, that the generator
+generates exactly the sub-group, and that the public key is also in
+the sub-group and not equal to one.
+
+Unfortunately, checking that the modulus is prime is computationally 
+expensive. The other consistency checks should be carried out. If the
+client can trust the server's signature (later on in the protocol) there
+is no need to check the modulus. 
+
+Message 5 -- CLient DH Public Key
+
+In addtion to the header, this message contains one variable length
+integer. The variable length integer is: the clients's Diffie-Hellman
+public key. The message type is 5. The length is variable but at least 6.
+The value zero as the public key specifies that the client does
+not support the server's modulus (too big).
+
+This results in the following message:
+  0   1   2   3   4   5   6   
++---+---+---+---+---+---+---+- - - - - - - -+
+|  >=6  |   5   | len 1 | Client Public Key |
++---+---+---+---+---+---+---+- - - - - - - -+
+
+Client Processing
+
+The client sets the value of the public key to zero if either it considers
+the server's maximum message length too small or if it considers the
+size of the modulus too large. Otherwise, the client generates a random
+number y, computes the generator to the power of y modulo the modulus
+and sends that value to the server as the client's public key.
+
+Server Processing
+
+If the client's public key is zero or if the client's public key is not
+in the right sub-group, the server aborts the connection.
+
+Message 6 -- Server Signature
+
+In addition to the header, this message contains 2 variable length integers.
+The variable length integers are: the modulus of the server's RSA public key
+and the server's signature. The message type is 6. The length is variable
+but at least 8. 
+
+This results in the following message:
+  0   1   2   3   4   5   6   
++---+---+---+---+---+---+---+- - -+---+---+---+- - - -+
+|  >=8  |   6   | len 1 | Modulus | len 2 | Signature |
++---+---+---+---+---+---+---+- - -+---+---+---+- - - -+
+
+Message 7 -- Client Signature
+
+In addition to the header, this message contains one 16-bit integer with
+flags and 2 variable length integers. The variable length integers are: the
+modulus of the client's RSA public key and the client's signature. 
+If the low order bit in the flags field is set, then the signature is
+invalid. This flag is set when the client wants to use password
+authetication. The message type is 7. The length is variable but at least 10. 
+
+This results in the following message:
+  0   1   2   3   4   5   6   7 
++---+---+---+---+---+---+---+---+---+- - -+---+---+---+- - - -+
+|  >=8  |   7   | flags | len 1 | Modulus | len 2 | Signature |
++---+---+---+---+---+---+---+---+---+- - -+---+---+---+- - - -+
+
+Message 8 -- Client Remote User and Service Request
+
+In addition to the header, this message contains 2 variable length octet
+strings. The variable length octet strings are: the account name on the
+server and the kind of service that the client wants to access.
+The message type is 8. The length is variable but at least 8. 
+
+This results in the following message:
+  0   1   2   3   4   5   6   
++---+---+---+---+---+---+---+- - - -+---+---+---+---+- - - -+
+|  >=6  |   8   | len 1 | Account name  | len 2 |  Service  |
++---+---+---+---+---+---+---+- - - -+---+---+---+---+- - - -+
+
+Message 9 -- Remote User Signature
+
+In addition to the header, this message contains one 16-bit integer with
+flags and 2 variable length integers. The variable length integers are: the
+modulus of the client's RSA public key and the remote user's signature. 
+If the low order bit in the flags field is set, then the signature is
+invalid. This flag is set when the remote user does not have a RSA private
+key. The message type is 9. The length is variable but at least 10. 
+
+This results in the following message:
+  0   1   2   3   4   5   6   7 
++---+---+---+---+---+---+---+---+---+- - -+---+---+---+- - - -+
+|  >=8  |   7   | flags | len 1 | Modulus | len 2 | Signature |
++---+---+---+---+---+---+---+---+---+- - -+---+---+---+- - - -+
+
+Message 10 -- Client Password
+
+In addition to the header, this message contains one 16-bit integer with
+flags and one variable length octet string. The variable length octet string
+is the password for the remote user. If the low order bit in the flags field
+is set, then the password is invalid. The message type is 10. The length
+is variable but at least 8. 
+
+This results in the following message:
+  0   1   2   3   4   5   6   7   8
++---+---+---+---+---+---+---+---+---+- - - -+
+|  >=8  |  10   | flags | len 1 | Password  |
++---+---+---+---+---+---+---+---+---+- - - -+
+
+Message 11 -- Access Status
+
+In addition to the header, this message contains one 16-bit integer with
+flags. If the low order bit in the flags field is set, then access is not
+granted. The message type is 11. The length is 6. 
+
+This results in the following message:
+  0   1   2   3   4   5
++---+---+---+---+---+---+
+|   6   |  11   | flags |
++---+---+---+---+---+---+
+
+Message 257 -- Byte Stream
+
+In addition to the header, this message contains one variable length octet
+string. The string contains application data. Message boundaries are not
+assumed to be record boundaries. The message type is 257. The length is
+at least 6. 
+
+This results in the following message:
+  0   1   2   3   4   5   6
++---+---+---+---+---+---+---+- - -+
+|  >=6  |  257  | len 1 | String  |
++---+---+---+---+---+---+---+- - -+
+
+
+
+$PchId: sc-prot.txt,v 1.1 2005/06/01 08:49:54 philip Exp $

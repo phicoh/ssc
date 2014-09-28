@@ -1,0 +1,65 @@
+.TH SSCRSH 1
+.SH NAME
+sscrsh \- execute a remote command using a secure channel
+.SH SYNOPSIS
+.B sscrsh
+.RB [ -l
+.IR user ]
+.RB [ -n ]
+.RB [ -o
+.IR options ]
+.I hostname
+.I command
+.RI [ string ]...
+.SH DESCRIPTION
+This program connects to 
+.I hostname
+using the
+.B sscclient (8)
+program.
+The 
+.I command
+(options strings)
+are send to the remote host for execution.
+Standard input is sent to the remote host (unless the
+.B -n
+option is used), and output to both standard out and standard error
+is properly demultiplexed and sent to standard out and standard error.
+.SH OPTIONS
+.TP
+.B -l \fIuser
+This option specifies the remote user.
+If no user is specified, the
+.B sscclient 
+program will try to login using the name of the local user.
+.TP
+.B -n
+No input is read from standard in.
+.TP 
+.B -o \fIoptions
+These options are passed directly to
+.BR sscclient (8).
+Options enable, for example,  password authentication and insecure connections.
+.TP
+.SH "SEE ALSO"
+.BR sscclient (8).
+.SH NOTES
+The 
+.B sscclient
+program is started by 
+.B sscrsh
+to setup a secure connection.
+First, the current path is searched for 
+.BR sscclient .
+If that fails, an attempt is made to execute
+.BR /usr/local/sbin/sscclient .
+.SH
+.TP
+/usr/local/sbin/sscclient
+fallback path for 
+.BR sscclient (8)
+.SH AUTHOR
+Philip Homburg
+
+.\"
+.\" $PchId: sscrsh.1,v 1.1 2005/05/13 21:14:18 philip Exp $

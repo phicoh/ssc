@@ -1,0 +1,28 @@
+.TH SSCRSHD 8
+.SH NAME
+sscrshd \- server for remote command execution
+.SH SYNOPSIS
+.B sscrshd
+.SH DESCRIPTION
+This program is started by the
+.BR sscserver (8)
+program to handle the service ``rsh''.
+The command string that is received from the peer is executed using
+``/bin/sh -c string''.
+Input from the peer is copied to standard input of the shell.
+Standard output and standard error from the shell are multiplexed and sent
+to the peer.
+Encryption and authentication is handled by
+.BR sscserver .
+.SH "SEE ALSO"
+.BR sscserver (8).
+.SH ENVIRONMENT
+.TP
+.B HOME
+The current working directory is change to the home directory before
+starting the shell.
+.SH AUTHOR
+Philip Homburg
+
+.\"
+.\" $PchId: sscrshd.8,v 1.1 2005/05/14 10:13:39 philip Exp $

@@ -1,0 +1,162 @@
+.TH SSCCLIENT 8
+.SH NAME
+sscclient \- secure connection to a remote system
+.SH SYNOPSIS
+.B sscclient
+.RB [ -b ] 
+.RB [ -l
+.IR user ]
+.RB [ -o
+.IR options ]
+.I hostname
+.I service
+.SH DESCRIPTION
+This program connects to 
+.I hostname
+and request service
+.I service 
+for user 
+.IR user .
+The connection is made over TCP/IP using the TCPMUX protocol
+(RFC-1078, TCP port 1), requesting service ``sscp''.
+
+Authentication is performed in two directions: 
+.B sscclient
+authenticates itself to the remote system and the remote system
+provides authentication data for
+.R sscclient .
+The remote system always uses RSA signatures to authenticate itself.
+One or two RSA keys are used.
+A signature made with the key that belongs to the host is always present.
+Optionally, the remote user can also have a key.
+
+Valid keys for remote systems are listed in the file
+.BR $HOME/.ssc/server-keys .
+A key for a remote host is listed as a single line that starts with the
+name of the host (as passed on the command line) followed by the string
+.B RSA3-SHA256
+followed by the hash of the public key.
+See 
+.BR rsagen (1)
+for more details about the computation and representation of RSA
+keys.
+A key for a remote user is similar to a host key, except that the line starts
+with
+.IR user @\fIhostname.
+
+The 
+.B sscclient
+program adds keys to the 
+.B server-keys
+file interactively: when a signature is received from a remote system and
+the corresponding key is not listed in the
+.B server-keys
+file, the user is asked whether or not the keys should be added to
+the file.
+There is currently no support for deleting keys.
+Stale keys should be deleted with a text editor.
+Keys can also be added directly with a text editor.
+
+Note that the hostname is taken literally from the command line.
+Using multiple names for a single system may result in multiple entries
+in the
+.B server-keys 
+file.
+
+The
+.B sscclient
+program computes whether a connection is secure or not based on whether
+keys are listed in the
+.B server-keys
+file and whether the keys used for signatures match the listed keys.
+When a signature is present with a different key than listed, the resulting
+connection is considered insecure.
+Furthermore, if none of the keys used for signatures are listed, then the
+connection is considered insecure as well.
+In the remaining cases, the connection is considered secure.
+
+Two mechanisms are available to authenticate the local user.
+The first mechanism, which is always used, is an RSA signature.
+The file 
+.B $HOME/.ssc/key-priv 
+contains the private key of the local user.
+See the 
+.B rsagen
+program for more information about this file.
+
+Disabled by default is password authentication.
+Password authentication can be enabled using the 
+.B password
+option (see the options section).
+The user will be prompted for a password, which is sent to the remote system.
+
+The 
+.B insecure
+option allows insecure connections without prompting the user.
+When password authentication is disabled, the connection is insecure,
+and the 
+.B insecure
+option is not used, the user is asked whether to continue with this connection
+or not.
+Sending a password over an insecure connection may lead to disclosure of
+the password.
+For this reason, the connection will be aborted if password authentication
+is enabled, the
+.B insecure 
+option is not used, and the connection is insecure.
+
+.SH OPTIONS
+.TP
+.B -b 
+This allow a program that relies on 
+.B sscclient
+to find out when the secure connection is ready.
+When this option is set, 
+.B sscclient
+sends a single newline character to standard output to signal that the
+connection has been established.
+.TP
+.B -l \fIuser
+This option specifies the remote user.
+If this option is not present, 
+.B sscclient
+will use
+the value of the environment variable
+.BR USER .
+.TP 
+.B -o \fIoptions
+The
+.I options
+argument is a comma separated list of options.
+Currently, two options are supported.
+The option,
+.B password
+enables password authentication.
+The user is prompted for a password, which will be sent to the 
+remote system.
+The second option is 
+.B insecure.
+This option both allows insecure connection and continues with an insecure
+connection without prompting the user. 
+This option should be used very carefully.
+.SH ENVIRONMENT
+.TP 10
+.B HOME
+Home directory of the local user.
+.TP
+.B USER
+The name of the local user.
+.SH FILES
+.TP
+.B $HOME/.ssc/server-keys
+List of valid keys for remote systems
+.TP
+.B $HOME/.ssc/key-priv
+The user's private key.
+.SH "SEE ALSO"
+.BR rsagen (1) .
+.SH AUTHOR
+Philip Homburg
+
+.\"
+.\" $PchId: sscclient.8,v 1.1 2005/05/24 11:55:23 philip Exp $

@@ -1,0 +1,6 @@
+# Name	pty?	path		argv0 ...
+rsh	-	/usr/local/bin/sscrshd		sscrshd
+telnet	pty	/usr/local/bin/ssctelnetd	ssctelnetd
+rcp	-	/usr/local/bin/sscrcpd		sscrcpd
+#
+# $PchId: services.proto,v 1.1 2005/06/01 10:12:52 philip Exp $

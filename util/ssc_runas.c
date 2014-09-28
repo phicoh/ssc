@@ -1,0 +1,80 @@
+/*
+ssc_runas.c
+
+Run a command as a different user
+
+Created:	Feb 2005 by Philip Homburg for NAH6
+*/
+
+#include "../include/os.h"
+
+char *progname;
+
+static void usage(void);
+
+int main(int argc, char *argv[])
+{
+	int r;
+	char *user, *prog, **list;
+	struct passwd *pe;
+
+	(progname= strrchr(argv[0],'/')) ? progname++ : (progname=argv[0]);
+
+	if (argc < 4)
+		usage();
+
+	user= argv[1];
+	prog= argv[2];
+	list= argv+3;
+
+	pe= getpwnam(user);
+	if (pe == NULL)
+	{
+		syslog(LOG_ERR, "getpwnam failed for user '%s'", user);
+		exit(1);
+	}
+	r= initgroups(pe->pw_name, pe->pw_gid);
+	if (r == -1)
+	{
+		syslog(LOG_ERR, "initgroups failed for user '%s': %s",
+			user, strerror(errno));
+		exit(1);
+	}
+
+	r= setuid(pe->pw_uid);
+	if (r == -1)
+	{
+		syslog(LOG_ERR, "setuid failed for user '%s': %s",
+			user, strerror(errno));
+		exit(1);
+	}
+	r= setgid(pe->pw_gid);
+	if (r == -1)
+	{
+		syslog(LOG_ERR, "setgid failed for user '%s': %s",
+			user, strerror(errno));
+		exit(1);
+	}
+
+	if (getuid() != pe->pw_uid || geteuid() != pe->pw_uid ||
+		getgid() != pe->pw_gid || getegid() != pe->pw_gid)
+	{
+		syslog(LOG_ERR, "user or groups ID did not sick");
+		exit(1);
+	}
+
+	execv(prog, list);
+	syslog(LOG_ERR, "execv '%s' failed: %s", prog, strerror(errno));
+	exit(1);
+}
+
+static void usage(void)
+{
+	fprintf(stderr, "Usage: %s <login> <executable> <argv0>...\n",
+		progname);
+	exit(1);
+}
+
+/*
+ * $PchId: ssc_runas.c,v 1.1 2005/05/13 10:03:25 philip Exp $
+ */

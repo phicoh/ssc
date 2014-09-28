@@ -1,0 +1,28 @@
+.TH SSCRCPD 8
+.SH NAME
+sscrcpd \- server part of remote file transfer
+.SH SYNOPSIS
+.B sscrcpd
+.SH DESCRIPTION
+This program is started by the
+.BR sscserver (8)
+program to handle the service ``rcp''.
+Commands and input are read from standard input and replies and output are
+sent to standard out.
+Encryption and authentication is handled by
+.BR sscserver .
+.SH "SEE ALSO"
+.BR sscserver (8).
+.SH BUGS
+Cancel requests from the
+.BR sscrcp (1)
+client are ignored.
+.SH ENVIRONMENT
+.TP
+.B HOME
+This environment variable is used to access relative paths.
+.SH AUTHOR
+Philip Homburg
+
+.\"
+.\" $PchId: sscrcpd.8,v 1.1 2005/05/13 13:11:12 philip Exp $

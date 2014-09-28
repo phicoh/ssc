@@ -1,0 +1,92 @@
+.TH SSCRCP 1
+.SH NAME
+sscrcp \- copy files to or from a remote system using a secure channel
+.SH SYNOPSIS
+.B sscrcp
+.RB [ -o
+.IR options ]
+.RB [ -p ]
+.RI [ user\fB@\fR]\fIhostname\fB:\fIpattern
+.I path
+
+.B sscrcp
+.RB [ -o
+.IR options ]
+.RB [ -p ]
+.IR file...
+.RI [ user\fB@\fR]\fIhostname\fB:\fR[\fIpath\fR]
+.SH DESCRIPTION
+This program copies file to or from a remote system.
+In the first form, the 
+.B sscrcp
+command copies one or more files from a remote system to a local file or
+directory.
+The
+.I pattern
+part of the remote file name can be absolute (if it starts with a slash)
+or relative to the remote user's home directory.
+Only the last component of 
+.I pattern
+is allowed to contain wildcards.
+
+If the pattern contains wildcards, then the local path has to refer to a 
+directory.
+If the pattern does not contain any wildcards, the local path can either be
+a file or a directory.
+If the local path is a directory, the last component of a remote filename is
+used to enter the file in the directory.
+
+The second form of the
+.B sscrcp
+command copies one or more local files to a remote system.
+When multiple files are copied, the remote path has to refer to a directory,
+otherwise, either a file or a directory is allowed.
+Wildcard expansion is done by the shell, so there is no need for explicit
+wildcard support in this form of the
+.B sscrcp
+command.
+
+In both forms of the command, the remote user can be specified.
+If no user is specified, the
+.B sscclient (8)
+program will try to login using the name of the local user.
+.SH OPTIONS
+.TP 
+.B -o \fIoptions
+These options are passed directly to
+.BR sscclient (8).
+Options enable, for example,  password authentication and insecure connections.
+.TP
+.B -p
+When this option is set, the access and modified times are copied as well.
+.SH "SEE ALSO"
+.BR sscclient (8).
+.SH NOTES
+The
+.B sscrcp
+can be called with one argument to start an interactive file transfer
+session.
+However, this feature is not implemented.
+
+It is not clear whether the lack of support for recursion should be addressed
+or not.
+
+The 
+.B sscclient
+program is started by 
+.B sscrcp
+to setup a secure connection.
+First, the current path is searched for 
+.BR sscclient .
+If that fails, an attempt is made to execute
+.BR /usr/local/sbin/sscclient .
+.SH
+.TP
+/usr/local/sbin/sscclient
+fallback path for 
+.BR sscclient (8)
+.SH AUTHOR
+Philip Homburg
+
+.\"
+.\" $PchId: sscrcp.1,v 1.1 2005/05/13 12:45:20 philip Exp $

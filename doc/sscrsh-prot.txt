@@ -1,0 +1,79 @@
+Simple Secure Channel Remote Shell Protocol
+
+Introduction
+
+This protcol describes a protocol for remote command execution on top of
+the simple secure channel (SSC) protocol.
+
+General Message Format
+
+Messages in this protocol have a fixed four octet header.
+This first two octets form a unsigned 16-bit integer that specifies the
+length of the message (including the header). The next two octets also
+for an unsigned 16-bit integer that specififies the message type.
+An arbitrary amount of padding may be added to encrypted messages
+(such that the resulting message does not exceed the maximum message size)
+to make traffic analysis more complicated.
+
+This results in the following message:
+
+  0   1   2   3   4
++---+---+---+---+---+- - - -+
+|Length | Type  | Contents  |
++---+---+---+---+---+- - - -+
+
+
+Message 0 -- Standard Input
+
+This message provides input to the remote command. A sequence of messages of
+this type should be treated as an octet stream. A message with zero
+length contents signals end of file.
+
+  0   1   2   3   4
++---+---+---+---+---+- - - -+
+|  >=4  |   0   | Contents  |
++---+---+---+---+---+- - - -+
+
+Message 1 -- Standard Output
+
+This message carries output from the remote command. A sequence of messages of
+this type should be treated as an octet stream.
+
+  0   1   2   3   4
++---+---+---+---+---+- - - -+
+|  >=4  |   1   | Contents  |
++---+---+---+---+---+- - - -+
+
+Message 2 -- Standard Error
+
+This message carries error output from the remote command. A sequence of
+messages of this type should be treated as an octet stream.
+
+  0   1   2   3   4
++---+---+---+---+---+- - - -+
+|  >=4  |   1   | Contents  |
++---+---+---+---+---+- - - -+
+
+Message 32768 (0x8000) -- Command
+
+This message carries the command to be execute. This message should sent
+once (by the application) and should be the first message. The command
+is executed using the equivalent of '/bin/sh -c contents'. 
+
+  0   1   2   3   4
++---+---+---+---+---+- - - -+
+|  >=4  |   1   | Contents  |
++---+---+---+---+---+- - - -+
+
+Message 32769 (0x8001) -- Signal
+
+This message allows the remote command to be signaled. The signal is an
+ASCII string. For example 'SIGHUP'. Unknown strings should be ignored.
+
+  0   1   2   3   4
++---+---+---+---+---+- - - -+
+|  >=4  |   1   | Contents  |
++---+---+---+---+---+- - - -+
+
+
+$PchId: sscrsh-prot.txt,v 1.1 2005/05/31 14:18:50 philip Exp $
