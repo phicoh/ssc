@@ -1,0 +1,25 @@
+# Makefile for the Simple Secure Channel implementation (and related utilities)
+
+ARCH_FLAGS=-DARCH_MINIX
+ARCH_SUBDIR=os/minix
+ALWAYS_AR=ar
+
+SUBDIRS=lib sscclient sscserver sscrcp sscrcpd sscrsh sscrshd \
+	ssctelnet ssctelnetd util
+all:	subdirs
+
+install:
+	set -e; for i in $(SUBDIRS); do (echo $$i:; cd $$i && make install); done
+
+subdirs:
+	set -e; for i in $(SUBDIRS); do \
+		(echo $$i:; cd $$i && \
+		make ARCH_FLAGS=${ARCH_FLAGS} ARCH_SUBDIR="${ARCH_SUBDIR}" \
+			ALWAYS_AR="${ALWAYS_AR}" all); \
+	done
+
+clean:
+	for i in $(SUBDIRS); do (echo $$i:; cd $$i && make clean); done
+
+#
+# $PchId: Makefile.minix,v 1.2 2011/12/29 20:35:48 philip Exp $

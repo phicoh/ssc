@@ -1,0 +1,27 @@
+# Makefile for the Simple Secure Channel implementation (and related utilities)
+
+ARCH_FLAGS=-DARCH_ANDROID
+ARCH_SUBDIR=os/linux
+CC=arm-none-linux-gnueabi-gcc
+LDFLAGS=-static
+
+SUBDIRS=lib sscclient sscserver sscrcp sscrcpd sscrsh sscrshd \
+	ssctelnet ssctelnetd util
+all:	subdirs
+
+install:
+	set -e; for i in $(SUBDIRS); do (echo $$i:; cd $$i && make install); done
+
+subdirs:
+	set -e; for i in $(SUBDIRS); do \
+		(echo $$i:; cd $$i && \
+		make ARCH_FLAGS=$(ARCH_FLAGS) ARCH_SUBDIR="$(ARCH_SUBDIR)" \
+			CC="$(CC)" LDFLAGS="$(LDFLAGS)" all); \
+	done
+
+clean:
+	for i in $(SUBDIRS); do (echo $$i:; cd $$i && \
+		make ARCH_SUBDIR="$(ARCH_SUBDIR)" clean); done
+
+#
+# $PchId: Makefile.android,v 1.1 2011/12/28 12:03:00 philip Exp $

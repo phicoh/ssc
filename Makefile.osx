@@ -1,0 +1,29 @@
+# Makefile for the Simple Secure Channel implementation (and related utilities)
+
+DEBUG_FLAGS=-g
+
+ARCH_FLAGS="-DARCH_OSX ${DEBUG_FLAGS}"
+ARCH_SUBDIR=os/osx
+OS_LIBS=
+ALWAYS_AR=ar
+
+SUBDIRS=lib sscclient sscserver sscrcp sscrcpd sscrsh sscrshd \
+	ssctelnet ${ssctelnetd} util
+all:	subdirs
+
+install:
+	set -e; for i in $(SUBDIRS); do (echo $$i:; cd $$i && make install); done
+
+subdirs:
+	set -e; for i in $(SUBDIRS); do \
+		(echo $$i:; cd $$i && \
+		$(MAKE) ARCH_FLAGS=${ARCH_FLAGS} ARCH_SUBDIR="${ARCH_SUBDIR}" \
+			OS_LIBS="${OS_LIBS}" ALWAYS_AR="${ALWAYS_AR}" all); \
+	done
+
+clean:
+	for i in $(SUBDIRS); do (echo $$i:; cd $$i && \
+		make ARCH_SUBDIR="${ARCH_SUBDIR}" clean); done
+
+#
+# $PchId: Makefile.osx,v 1.1 2011/12/28 12:02:48 philip Exp $
