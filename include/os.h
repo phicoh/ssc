@@ -99,7 +99,6 @@ typedef int U16_t;
 #ifdef ARCH_BSD
 
 #define POSIX_2000	/* Check what we really need */
-#define USE_UTMP
 
 #endif /* ARCH_BSD */
 
