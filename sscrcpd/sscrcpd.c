@@ -35,7 +35,7 @@ static void send_fn(char *fn);
 static char *get_status(struct sscrcp_hdr *hdrp);
 static void pretty(char *str);
 static int readall(void *buf, size_t size);
-static int writeall(void *buf, size_t size);
+static ssize_t writeall(void *buf, size_t size);
 static int fd_writeall(int fd, void *buf, size_t size);
 static void u16_to_be(U16_t v, u8_t buf[2]);
 static void u32_to_be(u32_t v, u8_t buf[4]);
@@ -750,5 +750,5 @@ static void fatal(char *fmt, ...)
 }
 
 /*
- * $PchId: sscrcpd.c,v 1.1 2005/05/13 13:10:47 philip Exp $
+ * $PchId: sscrcpd.c,v 1.2 2011/12/27 22:55:06 philip Exp $
  */

@@ -15,8 +15,6 @@ Created:	Feb 2005 by Philip Homburg for NAH6
 #include "sscclient.h"
 
 u32_t maxmsglen;
-int got_eof_from_app= 0;
-int got_eof_from_net= 0;
 
 /* Add this to $HOME */
 #define PRIV_KEY_PATH		"/.ssc/key-priv"
@@ -48,15 +46,10 @@ static struct
 	{ 0 }			/* end of list */
 };
 
-static sksc_t sksc_c;		/* Symmetric key secure channel, from client
-				 * to server.
-				 */
-static u8_t sksc_c_outbuf[4 + S_CPP_MAXMSGLEN + SKSC_OVERHEAD];
-
-static sksc_t sksc_s;		/* Symmetric key secure channel, from server
-				 * to client.
-				 */
-static u8_t sksc_s_inbuf[S_CPP_MAXMSGLEN + SKSC_OVERHEAD];
+sksc_t sksc_c;	/* Symmetric key secure channel, from client to server. */
+sksc_t sksc_s;	/* Symmetric key secure channel, from server to client. */
+u8_t sksc_c_outbuf[4 + S_CPP_MAXMSGLEN + SKSC_OVERHEAD];
+u8_t sksc_s_inbuf[4 + S_CPP_MAXMSGLEN + SKSC_OVERHEAD];
 static u8_t sksc_s_buf[S_CPP_MAXMSGLEN];	/* Decoded results */
 static size_t sksc_s_currsize, sksc_s_offset;
 
@@ -76,8 +69,6 @@ static void ask_insecure(void);
 static void add_key(char *servername, char *user,
 	unsigned char pk_hash[SHA256_DIGEST_LENGTH]);
 static void do_options(char *list);
-static void do_usr1(int sig);
-static void do_usr2(int sig);
 static void usage(void);
 
 int main(int argc, char *argv[])
@@ -262,9 +253,7 @@ int main(int argc, char *argv[])
 		fflush(stdout);
 	}
 
-	signal(SIGUSR1, do_usr1);
-	signal(SIGUSR2, do_usr2);
-	do_inout();
+	do_inout(tcp_fd);
 
 	return 0;
 }
@@ -362,8 +351,9 @@ int sksc_s_readall(void *buf, size_t size)
 		if (r < 0)
 		{
 			fprintf(stderr, 
-"sksc_s_readall: sksc_decrypt failed: len = %lu, sizeof(sksc_s_buf) = %d\n",
-				len, sizeof(sksc_s_buf));
+"sksc_s_readall: sksc_decrypt failed: len = %lu, sizeof(sksc_s_buf) = %ld\n",
+				(unsigned long)len,
+				(unsigned long)sizeof(sksc_s_buf));
 			return r;
 		}
 		if (r == 0)
@@ -1199,18 +1189,6 @@ static void do_options(char *list)
 	}
 }
 
-static void do_usr1(int sig)
-{
-	/* Something went wrong with child */
-	exit(1);
-}
-
-static void do_usr2(int sig)
-{
-	/* Child got EOF */
-	got_eof_from_app= 1;
-}
-
 static void usage(void)
 {
 	fprintf(stderr,
@@ -1220,5 +1198,5 @@ static void usage(void)
 
 
 /*
- * $PchId: sscclient.c,v 1.2 2005/06/01 10:22:52 philip Exp $
+ * $PchId: sscclient.c,v 1.4 2011/12/29 20:33:20 philip Exp $
  */

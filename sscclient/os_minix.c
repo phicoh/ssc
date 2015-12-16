@@ -16,6 +16,8 @@ Created:	Feb 2005 by Philip Homburg
 #include <net/hton.h>
 #include <net/netlib.h>
 #include <net/gen/in.h>
+#include <net/gen/in6.h>
+#include <net/gen/ins.h>
 #include <net/gen/inet.h>
 #include <net/gen/netdb.h>
 #include <net/gen/socket.h>
@@ -28,39 +30,31 @@ Created:	Feb 2005 by Philip Homburg
 				 */
 
 static pid_t child_pid;
+static int got_eof_from_app= 0;
+static int got_eof_from_net= 0;
 
 static void do_in(void);
 static void do_alarm(int sig);
 static void kill_parent(int sig);
+static void do_usr1(int sig);
+static void do_usr2(int sig);
 
 int tcp_connect(char *servername)
 {
 	char *tcp_device, *servicename;
-	struct hostent *he;
-	struct servent *se;
-	ipaddr_t hostaddr;
-	tcpport_t remport;
-	int e, i, fd;
-	nwio_tcpconf_t tcpconf;
+	struct addrinfo *res, *aip;
+	int e, i, r, fd, connected;
+	struct sockaddr_in sin4;
+	struct sockaddr_in6 sin6;
+	nwio_tcpconf_t tcp4conf;
+	nwio_tcp6conf_t tcp6conf;
 	nwio_tcpcl_t tcpcl;
+	struct addrinfo hints;
 
 	tcp_device= getenv("TCP_DEVICE");
 	if (tcp_device == NULL) tcp_device= TCP_DEVICE;
 
-#if USE_TCPMUX
-	servicename= "tcpmux";
-	se= getservbyname(servicename, "tcp");
-	if (se == NULL)
-		fatal("unable to lookup port for service '%s'\n", servicename);
-	remport= se->s_port;
-#else
-	servicename= SSC_PROTO_NAME;
-	se= getservbyname(servicename, "tcp");
-	if (se == NULL)
-		fatal("unable to lookup port for service '%s'\n", servicename);
-	remport= se->s_port;
-#endif
-
+#if 0
 	he= gethostbyname(servername);
 	if (he == NULL)
 		fatal("unknown hostname '%s'", servername);
@@ -110,6 +104,106 @@ int tcp_connect(char *servername)
 		/* Success */
 		break;
 	}
+#endif
+
+#if USE_TCPMUX
+	servicename= "tcpmux";
+#else
+	servicename= SSC_PROTO_NAME;
+#endif
+
+	memset(&hints, '\0', sizeof(hints));
+	hints.ai_socktype= SOCK_STREAM;
+
+	r= getaddrinfo(servername, servicename, &hints, &res);
+	if (r != 0)
+	{
+		fatal("getaddrinfo failed for '%s'/%s: %s\n",
+			servername, servicename ? servicename : "(null)",
+			gai_strerror(r));
+
+	}
+
+	fd= open (tcp_device, O_RDWR);
+	if (fd == -1)
+		fatal("Unable to open %s: %s", tcp_device, strerror(errno));
+
+	connected= 0;
+	for (aip= res; aip; aip= aip->ai_next)
+	{
+		switch(aip->ai_family)
+		{
+		case AF_INET:
+			if (aip->ai_addrlen != sizeof(sin4))
+			{
+				fprintf(stderr,
+				"bad socket address length %d\n",
+					aip->ai_addrlen);
+				continue;
+			}
+			memcpy(&sin4, aip->ai_addr, sizeof(sin4));
+
+			tcp4conf.nwtc_flags= NWTC_COPY | 
+				NWTC_SET_RA | NWTC_SET_RP;
+			tcp4conf.nwtc_remaddr= sin4.sin_addr.s_addr;
+			tcp4conf.nwtc_remport= sin4.sin_port;
+			tcp4conf.nwtc_flags |= NWTC_LP_SEL;
+
+			r= ioctl (fd, NWIOSTCPCONF, &tcp4conf);
+			if (r == -1)
+			{
+				fatal("NWIOSTCPCONF failed: %s",
+					strerror(errno));
+			}
+			break;
+
+		case AF_INET6:
+			if (aip->ai_addrlen != sizeof(sin6))
+			{
+				fprintf(stderr,
+				"telnet: bad socket address length %d\n",
+					aip->ai_addrlen);
+				continue;
+			}
+			memcpy(&sin6, aip->ai_addr, sizeof(sin6));
+
+			tcp6conf.nwt6c_flags= NWT6C_COPY | NWT6C_UNSET_LA |
+				NWT6C_SET_RA | NWT6C_SET_RP;
+			memcpy(&tcp6conf.nwt6c_remaddr, &sin6.sin6_addr,
+				sizeof(tcp6conf.nwt6c_remaddr));
+			tcp6conf.nwt6c_remport= sin6.sin6_port;
+			tcp6conf.nwt6c_flags |= NWT6C_LP_SEL;
+
+			r= ioctl (fd, NWIOSTCP6CONF, &tcp6conf);
+			if (r == -1)
+			{
+				fatal("NWIOSTCP6CONF failed: %s",
+					strerror(errno));
+			}
+			break;
+
+		default:
+			fprintf(stderr, "telnet: skipping af_family %d\n",
+				aip->ai_family);
+			continue;
+		}
+
+		tcpcl.nwtcl_flags= 0;
+		r= ioctl (fd, NWIOTCPCONN, &tcpcl);
+		if (r == 0)
+		{
+			connected= 1;
+			break;
+		}
+		if (!aip->ai_next)
+			fatal("Unable to connect: %s", strerror(errno));
+		fprintf(stderr, "connect failed: %s\n",
+			strerror(errno));
+	}	
+	freeaddrinfo(res);
+
+	if (!connected)
+		exit(1);
 
 	return fd;
 }
@@ -119,12 +213,15 @@ void tcp_shutdown(int fd)
 	fprintf(stderr, "should shutdown connection\n");
 }
 
-void do_inout(void)
+void do_inout(int tcp_fd)
 { 
 	unsigned char *buf;
 	u16_t len, len1, type, extra_len, o, wo;
 	int r, fd;
 	struct sscp_bytes bytes_msg;
+
+	signal(SIGUSR1, do_usr1);
+	signal(SIGUSR2, do_usr2);
 
 	child_pid= fork();
 	if (child_pid == 0)
@@ -357,6 +454,18 @@ int syslog(int level, char *fmt, ...)
 }
 #endif /* !__minix_vmd */
 
+static void do_usr1(int sig)
+{
+	/* Something went wrong with child */
+	exit(1);
+}
+
+static void do_usr2(int sig)
+{
+	/* Child got EOF */
+	got_eof_from_app= 1;
+}
+
 /*
- * $PchId: os_minix.c,v 1.2 2005/06/01 10:23:31 philip Exp $
+ * $PchId: os_minix.c,v 1.6 2011/12/29 20:33:58 philip Exp $
  */

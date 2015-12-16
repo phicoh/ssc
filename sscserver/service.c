@@ -12,6 +12,10 @@ Created:	Feb 2005 by Philip Homburg for NAH6
 #include "sscserver.h"
 
 #define SSC_RUNAS	"/usr/local/bin/ssc_runas"
+#if 0	/* For Android. Should come from os.h */
+#undef SSC_RUNAS
+#define SSC_RUNAS	"/data/p/ssc_runas"
+#endif
 
 #define MAX_ARGS	20
 #define S_ARGS		10
@@ -306,8 +310,13 @@ static void start_service(int stdin_fds[2], int stdout_fds[2], int pty_fd,
 		path= "/bin:/usr/bin:/usr/local/bin";
 	env[0]= concat2("PATH=", path);
 	env[1]= concat2("USER=", user);
+#if 1
 	env[2]= concat2("HOME=", pe->pw_dir);
 	env[3]= concat2("SHELL=", pe->pw_shell);
+#else	/* For Android, should be configured in os.h */
+	env[2]= concat2("HOME=", "/data/p");
+	env[3]= concat2("SHELL=", "/bin/sh");
+#endif
 	env[4]= 0;
 
 	list[0]= SSC_RUNAS;
@@ -367,5 +376,5 @@ static char *concat2(char *s1, char *s2)
 }
 
 /*
- * $PchId: service.c,v 1.2 2005/06/01 10:25:45 philip Exp $
+ * $PchId: service.c,v 1.3 2011/12/28 11:54:12 philip Exp $
  */

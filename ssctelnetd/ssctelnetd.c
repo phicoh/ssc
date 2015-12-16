@@ -86,7 +86,7 @@ struct option remote_options[]=		/* DO / DON'T */
 	{ TELOPT_XDISPLOC, "x-display-location",
 		1, 0, opt_xdisploc, },
 	{ TELOPT_NAWS, "window-size",
-		0, 0, opt_null, },
+		1, 0, opt_null, },
 	{ -1, NULL }	/* end */
 
 };
@@ -1298,5 +1298,5 @@ static void usage(void)
 
 
 /*
- * $PchId: ssctelnetd.c,v 1.2 2005/06/01 10:16:27 philip Exp $
+ * $PchId: ssctelnetd.c,v 1.3 2011/12/25 12:33:27 philip Exp $
  */

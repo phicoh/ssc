@@ -1,4 +1,4 @@
-1) Copyling
+1) Compiling
 
 make
 
@@ -21,4 +21,4 @@ rsagen -h 2048
 tcpd tcpmux tcpmux sscp /usr/local/bin/sscserver sscserver
 
 
-$PchId: INSTALL,v 1.1 2005/06/01 10:22:26 philip Exp $
+$PchId: INSTALL,v 1.2 2008/11/12 12:44:32 philip Exp $

@@ -10,6 +10,10 @@ Created:	March 2005 by Philip Homburg for NAH6
 #include "../include/prot_rsh.h"
 
 #define SHELL "/bin/sh"
+#if 0 /* For Android: (should be moved to os.h) */
+#undef SHELL
+#define SHELL "/system/bin/sh"
+#endif
 
 #define RETRY_FAST_NR	10
 #define SHORT_TO	 1
@@ -29,13 +33,13 @@ static void do_pipe(int fds[2]);
 static void do_in(void);
 static void do_outerr(void);
 static void do_out(void *buf, size_t bufsize);
-static int do_out1(void *buf, size_t bufsize);
+static ssize_t do_out1(void *buf, size_t bufsize);
 static void do_err(void *buf, size_t bufsize);
-static int do_err1(void *buf, size_t bufsize);
+static ssize_t do_err1(void *buf, size_t bufsize);
 static void do_alarm(int sig);
 static void do_usr2(int sig);
 static int readall(void *buf, size_t size);
-static int writeall(void *buf, size_t size);
+static ssize_t writeall(void *buf, size_t size);
 static void u16_to_be(U16_t v, u8_t buf[2]);
 static void u32_to_be(u32_t v, u8_t buf[4]);
 static u16_t u16_from_be(u8_t buf[2]);
@@ -47,6 +51,8 @@ int main(int argc, char *argv[])
 {
 	int fd;
 	char *home;
+
+	openlog("sscrshd", LOG_CONS, LOG_AUTH);
 
 	(progname=strrchr(argv[0], '/')) ? progname++ : (progname=argv[0]);
 
@@ -550,5 +556,5 @@ static void fatal_kill(char *fmt, ...)
 }
 
 /*
- * $PchId: sscrshd.c,v 1.1 2005/05/14 10:12:10 philip Exp $
+ * $PchId: sscrshd.c,v 1.2 2011/12/27 22:56:03 philip Exp $
  */

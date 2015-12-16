@@ -18,6 +18,8 @@ int main(int argc, char *argv[])
 	char *user, *prog, **list;
 	struct passwd *pe;
 
+	openlog("ssc_runas", LOG_CONS, LOG_AUTH);
+
 	(progname= strrchr(argv[0],'/')) ? progname++ : (progname=argv[0]);
 
 	if (argc < 4)
@@ -76,5 +78,5 @@ static void usage(void)
 }
 
 /*
- * $PchId: ssc_runas.c,v 1.1 2005/05/13 10:03:25 philip Exp $
+ * $PchId: ssc_runas.c,v 1.2 2011/12/28 11:46:05 philip Exp $
  */

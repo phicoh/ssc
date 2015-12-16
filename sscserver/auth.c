@@ -98,7 +98,11 @@ void get_user_service(void)
 	if (pwd_entry != NULL)
 		home= pwd_entry->pw_dir;
 	else
+#if 0	/* For Android, should depend on something in os.h */
+		home= "/data/p";
+#else
 		home= NULL;
+#endif
 }
 
 void get_password(void)
@@ -422,5 +426,5 @@ static char *read_line(FILE *file, char *filename)
 
 
 /*
- * $PchId: auth.c,v 1.2 2005/06/01 10:24:40 philip Exp $
+ * $PchId: auth.c,v 1.3 2011/12/28 11:55:51 philip Exp $
  */

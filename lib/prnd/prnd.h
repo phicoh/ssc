@@ -9,7 +9,7 @@ Created:	January 2005 by Philip Homburg for NAH6
 #ifndef PRND__H
 #define PRND__H
 
-#include <sys/types.h>
+#include "../../include/os.h"
 
 /* This value of PRND_KEYSIZE happens to be the output size of SHA-256,
  * a valid key size for AES and two times the block size of AES.
@@ -39,5 +39,5 @@ void prnd_data(struct prnd *prndp, void *data, size_t len);
 #endif /* PRND__H */
 
 /*
- * $PchId: prnd.h,v 1.1 2005/05/03 10:55:23 philip Exp $
+ * $PchId: prnd.h,v 1.2 2011/12/28 11:47:28 philip Exp $
  */

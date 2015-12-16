@@ -6,6 +6,9 @@ Message Authentication Code based on AES in CBC mode
 Created:	Feb 2005 by Philip Homburg for NAH6
 */
 
+#ifndef CBCMAC_AES_H
+#define CBCMAC_AES_H
+
 #include "../../include/os.h"
 #include "../../include/rijndael.h"
 
@@ -39,6 +42,8 @@ void cbcmac_aes_finish(struct cbcmac_aes_ctx *ctxp,
 /* Clear the context */
 void cbcmac_aes_cleanup(struct cbcmac_aes_ctx *ctxp);
 
+#endif /* CBCMAC_AES_H */
+
 /*
- * $PchId: cbcmac_aes.h,v 1.1 2005/05/03 13:38:10 philip Exp $
+ * $PchId: cbcmac_aes.h,v 1.2 2011/12/29 20:19:06 philip Exp $
  */

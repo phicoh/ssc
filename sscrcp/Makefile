@@ -3,6 +3,7 @@
 #CC=gcc -O9
 INSTALL=install
 BIN=/usr/local/bin
+CFLAGS=${ARCH_FLAGS}
 
 all:	sscrcp
 
@@ -22,4 +23,4 @@ clean:
 	rm -f sscrcp $(SSCRCP_OBJ)
 
 #
-# $PchId: Makefile,v 1.2 2005/06/01 10:17:33 philip Exp $
+# $PchId: Makefile,v 1.3 2011/12/28 11:48:10 philip Exp $

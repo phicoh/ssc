@@ -47,17 +47,17 @@
 #ifdef K_AND_R
 void
 Ulong_bigmultN(a, b, c, N)
-  unsigned long *a, *b, *c;
+  Ulong *a, *b, *c;
   int N;
 #else
-void Ulong_bigmultN(unsigned long *a,
-		    unsigned long *b,
-		    unsigned long *c,
+void Ulong_bigmultN(Ulong *a,
+		    Ulong *b,
+		    Ulong *c,
 		    int N)
 #endif
 {
-	register unsigned long *ap, *bp, *cp;
-	register unsigned long carry, m;
+	register Ulong *ap, *bp, *cp;
+	register Ulong carry, m;
 	register int i;
 	
 	ap = a;
@@ -82,15 +82,15 @@ void Ulong_bigmultN(unsigned long *a,
 #ifdef K_AND_R
 void
 Ulong_bigsquareN(a, c, N)
-  unsigned long *a, *c;
+  Ulong *a, *c;
   int N;
 #else
-void Ulong_bigsquareN(unsigned long *a,
-		      unsigned long *c,
+void Ulong_bigsquareN(Ulong *a,
+		      Ulong *c,
 		      int N)
 #endif
 {
-	register unsigned long *ap, *cp, m;
+	register Ulong *ap, *cp, m;
 	register int i, j;
 	
 	ap = a;
@@ -118,17 +118,17 @@ void Ulong_bigsquareN(unsigned long *a,
 void
 Ulong_bigmult(a, sb, c, offset)
   BigInt a, c;
-  unsigned long sb;
+  Ulong sb;
   int offset;
 #else
 void Ulong_bigmult(BigInt a,
-		   unsigned long sb,
+		   Ulong sb,
 		   BigInt c,
 		   int offset)
 #endif
 {
-	unsigned long m, carry;
-	unsigned long *ap, *cp;
+	Ulong m, carry;
+	Ulong *ap, *cp;
 	int gap, i;
 
 	i = LENGTH(a) + offset;
@@ -140,7 +140,7 @@ void Ulong_bigmult(BigInt a,
 		i = -gap;
 		cp = NUM(c) + LENGTH(c);
 		do {
-			*cp++ = (unsigned long)0;
+			*cp++ = (Ulong)0;
 		} while (--i >= 0);
 	}
 

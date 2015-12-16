@@ -3,14 +3,17 @@
 #CC=gcc -O9
 OBJ=rsa.o
 AR=ar
+LIBCRYPT=../libcrypt.a
+CFLAGS=${ARCH_FLAGS}
 
-all:	../libcrypt.a
+all:	${LIBCRYPT}
+	$(ALWAYS_AR) r ${LIBCRYPT} $(OBJ)
 
 clean:
 	rm -f $(OBJ)
 
-../libcrypt.a:	$(OBJ)
+${LIBCRYPT}:	$(OBJ)
 	$(AR) r $@ $(OBJ)
 
 #
-# $PchId: Makefile,v 1.1 2005/05/02 15:12:22 philip Exp $
+# $PchId: Makefile,v 1.2 2011/12/27 22:45:43 philip Exp $

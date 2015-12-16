@@ -36,6 +36,7 @@
  *
  */
 
+#include "os.h"
 
 #include <sys/types.h>
 /* #include <sys/time.h> */
@@ -63,7 +64,7 @@
  *
  */
 
-#if defined(__bsdi__) || defined(__FreeBSD__)
+#if defined(__bsdi__)
 #define assert(x)
 #endif
 
@@ -1091,5 +1092,5 @@ char* SHA384_Data(const sha2_byte* data, size_t len, char digest[SHA384_DIGEST_S
 #endif /* !NO_64BIT */
 
 /*
- * $PchId: sha2.c,v 1.1 2005/05/06 20:50:09 philip Exp $
+ * $PchId: sha2.c,v 1.3 2012/01/27 15:55:49 philip Exp $
  */

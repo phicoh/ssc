@@ -3,6 +3,7 @@
 #CC=gcc -O9
 OBJ=hmac_sha256.o
 AR=ar
+CFLAGS=${ARCH_FLAGS} -I../../include
 
 all:	../libcrypt.a
 
@@ -13,4 +14,4 @@ clean:
 	$(AR) r $@ $(OBJ)
 
 #
-# $PchId: Makefile,v 1.1 2005/05/03 13:30:51 philip Exp $
+# $PchId: Makefile,v 1.2 2011/12/27 22:24:25 philip Exp $

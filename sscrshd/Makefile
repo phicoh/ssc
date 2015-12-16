@@ -3,6 +3,7 @@
 #CC=gcc -O9
 BIN=/usr/local/bin
 INSTALL=install
+CFLAGS=${ARCH_FLAGS}
 
 all:	sscrshd
 
@@ -13,7 +14,7 @@ SSCRSHD_OBJ=	sscrshd.o $(SSCRSHD_OS)
 SSCRSHD_LIB=	../lib/libos.a
 
 sscrshd:	$(SSCRSHD_OBJ) $(SSCRSHD_LIB)
-	$(CC) -o $@ $(SSCRSHD_OBJ) $(SSCRSHD_LIB)
+	$(CC) -o $@ $(LDFLAGS) $(SSCRSHD_OBJ) $(SSCRSHD_LIB)
 
 $(BIN)/sscrshd: sscrshd
 	$(INSTALL) sscrshd $@
@@ -22,4 +23,4 @@ clean:
 	rm -f sscrshd $(SSCRSHD_OBJ)
 
 #
-# $PchId: Makefile,v 1.2 2005/06/01 10:14:35 philip Exp $
+# $PchId: Makefile,v 1.3 2011/12/28 11:49:18 philip Exp $

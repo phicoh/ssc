@@ -2,15 +2,18 @@
 
 #CC=gcc -O9
 OBJ=isprime.o rndprime.o
+LIBCRYPT=../libcrypt.a
 AR=ar
+CFLAGS=${ARCH_FLAGS}
 
-all:	../libcrypt.a
+all:	${LIBCRYPT}
+	$(ALWAYS_AR) r ${LIBCRYPT} $(OBJ)
 
 clean:
 	rm -f $(OBJ)
 
-../libcrypt.a:	$(OBJ)
+${LIBCRYPT}:	$(OBJ)
 	$(AR) r $@ $(OBJ)
 
 #
-# $PchId: Makefile,v 1.1 2005/05/03 10:35:40 philip Exp $
+# $PchId: Makefile,v 1.2 2011/12/27 22:42:02 philip Exp $

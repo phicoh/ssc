@@ -36,10 +36,13 @@
  *	you're willing, pass them along to other users of CryptoLib.
  */
 #include "longlong.h"
+#include <stdint.h>
+
+typedef uint32_t Ulong;
 
 #ifdef MSVC20
 
-__inline static unsigned long umul32(unsigned long *hi, unsigned long a, unsigned long b)
+__inline static Ulong umul32(Ulong *hi, Ulong a, Ulong b)
 {
 	_asm {
 		push ebx
@@ -67,7 +70,7 @@ __inline static unsigned long umul32(unsigned long *hi, unsigned long a, unsigne
 }}
 
 #define add32(sh, sl, ah, al, bh, bl) {{ \
- unsigned long __c; \
+ Ulong __c; \
  __c = (al) + (bl); \
  (sh) = (ah) + (bh) + (__c < (al)); \
  (sl) = __c; \
@@ -75,24 +78,24 @@ __inline static unsigned long umul32(unsigned long *hi, unsigned long a, unsigne
 
 #define LO(x) ((Ushort) (x))
 #define HI(x) ((x) >> 16)
-#define UHI(x) (((unsigned long) (x)) >> 16)
+#define UHI(x) (((Ulong) (x)) >> 16)
 
 
 #ifdef K_AND_R
-unsigned long
+Ulong
 LMULT(dst, m, src, N)
-  unsigned long *dst, m, *src;
+  Ulong *dst, m, *src;
   int N;
 #else
-unsigned long
-LMULT(unsigned long *dst,
-      unsigned long m,
-      unsigned long *src,
+Ulong
+LMULT(Ulong *dst,
+      Ulong m,
+      Ulong *src,
       int N)
 #endif
 {
-	unsigned long sumh, suml;
-	unsigned long carry, *ap, *cp, mm;
+	Ulong sumh, suml;
+	Ulong carry, *ap, *cp, mm;
 	int i;
 	
 	ap = src;
@@ -108,6 +111,10 @@ LMULT(unsigned long *dst,
 		
 		cp[i] += suml;
 		carry = sumh + (cp[i] < suml);
+#if 0
+printf("LMULT: mm 0x%x, ap[%d] 0x%x -> sumh 0x%x, suml 0x%x, cp[%d] 0x%x, carry %d\n",
+	mm, i, ap[i], sumh, suml, i, cp[i], carry);
+#endif
 		
 	}
 	
@@ -117,7 +124,7 @@ LMULT(unsigned long *dst,
 
 
 #define SQRSTEP() {{ \
- sum = (unsigned long)m*(unsigned long)m; \
+ sum = (Ulong)m*(Ulong)m; \
  cp[0] = (Ushort)sum; \
  cp[1] = (Ushort)(sum >> 16); \
 }}
@@ -125,16 +132,16 @@ LMULT(unsigned long *dst,
 #ifdef K_AND_R
 void
 BUILDDIAG(dst, src, N)
-  unsigned long *dst, *src;
+  Ulong *dst, *src;
   int N;
 #else
 void
-BUILDDIAG(unsigned long *dst,
-	  unsigned long *src,
+BUILDDIAG(Ulong *dst,
+	  Ulong *src,
 	  int N)
 #endif
 {
-	unsigned long *ap, *cp, m;
+	Ulong *ap, *cp, m;
 	int i;
 	
 	ap = src;
@@ -153,21 +160,21 @@ BUILDDIAG(unsigned long *dst,
 #ifdef K_AND_R
 void
 SQUAREINNERLOOP(dst, m, src, start, end)
-  unsigned long *dst, m, *src;
+  Ulong *dst, m, *src;
   int start, end;
 #else
 void
-SQUAREINNERLOOP(unsigned long *dst,
-		unsigned long m,
-		unsigned long *src,
+SQUAREINNERLOOP(Ulong *dst,
+		Ulong m,
+		Ulong *src,
 		int start,
 		int end)
 #endif
 {
-	unsigned long *ap, *cp;
+	Ulong *ap, *cp;
 	int j;
-	unsigned long prodhi, prodlo;
-	unsigned long sumh, suml, carry;
+	Ulong prodhi, prodlo;
+	Ulong sumh, suml, carry;
 	
 	cp = dst;
 	ap = src;

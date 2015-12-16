@@ -6,6 +6,9 @@ Symmetric Key Secure Channel (Based on AES-CFB and CBCMAC-AES)
 Created:	December 2004 by Philip Homburg <philip@f-mnx.phicoh.com>
 */
 
+#ifndef SKSC_H
+#define SKSC_H
+
 #include "../../include/rijndael.h"
 #include "../cbcmac/cbcmac_aes.h"
 
@@ -47,6 +50,8 @@ ssize_t sksc_decrypt(sksc_t *skscp, void *in, size_t inlen,
 /* Clean the SKSC data structure */
 void sksc_cleanup(sksc_t *skscp);
 
+#endif /* SKSC_H */
+
 /*
- * $PchId: sksc.h,v 1.1 2005/05/06 19:32:15 philip Exp $
+ * $PchId: sksc.h,v 1.2 2011/12/29 20:20:03 philip Exp $
  */

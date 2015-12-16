@@ -13,7 +13,11 @@ Created:	Feb 2005 by Philip Homburg for NAH6
 #include "../include/protocol.h"
 #include "sscserver.h"
 
+#if 1
 char *sfile_name= "/etc/ssc/services";
+#else	/* For Android, should be configured in os.h */
+char *sfile_name= "/data/ssc/services";
+#endif
 
 static char *progname;
 
@@ -40,6 +44,10 @@ static sksc_t sksc_s;		/* Symmetric key secure channel, from server
 static u8_t sksc_s_outbuf[4 + S_SPP_MAXMSGLEN + SKSC_OVERHEAD];
 
 #define HOST_KEY	"/etc/ssc/host-priv"
+#if 0	/* For Android, should be configured in os.h */
+#undef HOST_KEY
+#define HOST_KEY	"/data/ssc/host-priv"
+#endif
 
 static void do_version(SHA256_CTX *ctx);
 static void init_sksc(SHA256_CTX *dhsec_ctx);
@@ -53,6 +61,8 @@ int main(int argc, char *argv[])
 	SHA256_CTX prot_hash_ctx, dhsec_hash_ctx,
 		client_hash_ctx, server_hash_ctx, user_hash_ctx;
 	unsigned char pk_hash[SHA256_DIGEST_LENGTH];
+
+	openlog("sscserver", LOG_CONS, LOG_AUTH);
 
 	(progname=strrchr(argv[0], '/')) ? progname++ : (progname=argv[0]);
 
@@ -426,5 +436,5 @@ static void usage(void)
 
 
 /*
- * $PchId: sscserver.c,v 1.1 2005/05/25 14:03:25 philip Exp $
+ * $PchId: sscserver.c,v 1.2 2011/12/28 11:56:25 philip Exp $
  */

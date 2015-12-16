@@ -2,15 +2,17 @@
 
 #CC=gcc -O9
 OBJ=random.o strlcat.o strlcpy.o syslog.o
+LIBOS=../../libos.a
 AR=ar
 
-all:	../../libos.a
+all:	${LIBOS}
+	$(AR) r ${LIBOS} $(OBJ)
 
 clean:
 	rm -f $(OBJ)
 
-../../libos.a:	$(OBJ)
+${LIBOS}:	$(OBJ)
 	$(AR) r $@ $(OBJ)
 
 #
-# $PchId: Makefile,v 1.1 2005/05/03 12:10:21 philip Exp $
+# $PchId: Makefile,v 1.2 2011/12/29 20:34:44 philip Exp $

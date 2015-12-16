@@ -8,6 +8,7 @@ Created:	Feb 2005 by Philip Homburg for NAH6
 
 #include "../lib/sha2/sha2.h"
 #include "../lib/prnd/prnd.h"
+#include "../lib/sksc/sksc.h"
 #include "../include/protocol.h"
 
 /* Connect indirectly through the TCPMUX protocol (RFC-1078) on TCP port 1 */
@@ -41,14 +42,16 @@ void shutdown_fatal(char *fmt, ...);
 /* os_<OS>.c */
 int tcp_connect(char *servername);
 void tcp_shutdown(int fd);
-void do_inout(void);
+void do_inout(int tcp_fd);
 void set_echo(FILE *file, int on_off);
 
 /* sscclient.c */
 extern u32_t maxmsglen;
-extern int got_eof_from_app;
-extern int got_eof_from_net;
+extern sksc_t sksc_c;
+extern sksc_t sksc_s;
+extern u8_t sksc_c_outbuf[4 + S_CPP_MAXMSGLEN + SKSC_OVERHEAD];
+extern u8_t sksc_s_inbuf[4 + S_CPP_MAXMSGLEN + SKSC_OVERHEAD];
 
 /*
- * $PchId: sscclient.h,v 1.1 2005/05/24 11:54:46 philip Exp $
+ * $PchId: sscclient.h,v 1.2 2011/12/29 20:24:35 philip Exp $
  */

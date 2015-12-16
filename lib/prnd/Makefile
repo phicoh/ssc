@@ -3,14 +3,13 @@
 #CC=gcc -O9
 OBJ=prnd.o
 AR=ar
+CFLAGS=${ARCH_FLAGS}
 
-all:	../libcrypt.a
+all:	$(OBJ)
+	$(AR) r ../libcrypt.a $(OBJ)
 
 clean:
 	rm -f $(OBJ)
 
-../libcrypt.a:	$(OBJ)
-	$(AR) r $@ $(OBJ)
-
 #
-# $PchId: Makefile,v 1.1 2005/05/03 10:55:59 philip Exp $
+# $PchId: Makefile,v 1.2 2011/12/27 22:43:14 philip Exp $

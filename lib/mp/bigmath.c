@@ -728,12 +728,12 @@ _TYPE( int ) bigCompareX(BigInt a,
 #ifndef OLDMODREDUX
 
 #ifdef K_AND_R
-_TYPE( unsigned long )
+_TYPE( Ulong )
 longBigDivide(big, d)
   BigInt big;
   Ulong d;
 #else
-_TYPE( unsigned long ) longBigDivide(BigInt big,
+_TYPE( Ulong ) longBigDivide(BigInt big,
 				     Ulong d)
 #endif
 {
@@ -759,7 +759,7 @@ _TYPE( unsigned long ) longBigDivide(BigInt big,
 
 	dhi = (Ushort)(d>>16)&(Ushort)0xFFFF;
 
-	divnum[1] = (unsigned long)dhi;
+	divnum[1] = (Ulong)dhi;
 	divnum[0] = (d << 16);
 	div.length = 2;
 	
@@ -780,7 +780,7 @@ _TYPE( unsigned long ) longBigDivide(BigInt big,
 	}
 	bigSubtract(&x, &tmp, &x);
 	
-	r = (unsigned long)((Ulong)q << 16);
+	r = (Ulong)((Ulong)q << 16);
 	s = ((xnum[1]&0xFFFF)<<16) + (xnum[0]>>16);
 	if ((xnum[1]&0xFFFF) == (Ulong)dhi)
 		q = (Ushort)0xFFFF;
@@ -796,7 +796,7 @@ _TYPE( unsigned long ) longBigDivide(BigInt big,
 		q = q - 1;
 		bigSubtract(&tmp, &div, &tmp);
 	}
-	r += (unsigned long)q;
+	r += (Ulong)q;
 	
 	return r;
 }
@@ -818,6 +818,12 @@ _TYPE( void ) bigMod(BigInt a,
 	static BigInt div, tmp;
 	static int first_time = 1;
 	int i, l, k, changed, normbits, savesign;
+
+#if 0
+	printf("bigMod: a = (size %d) ", bigBits(a)); bigprint(a);
+	printf("bigMod: m = (size %d) ", bigBits(m)); bigprint(m);
+#endif
+	
 	
 	if (ZERO(m))
 		handle_exception(CRITICAL, "bigMod: modulus is zero.\n");
@@ -839,7 +845,7 @@ _TYPE( void ) bigMod(BigInt a,
 	changed = 0;
 	normbits = 0;
 	/* Normalize the modulus, m and the dividend x to have msb = 1 */
-	if (NUM(m)[LENGTH(m)-1] < (unsigned long)0x80000000) {
+	if (NUM(m)[LENGTH(m)-1] < (Ulong)0x80000000) {
 		normbits = (32-msb(NUM(m)[LENGTH(m)-1]));
 		bigLeftShift(m, normbits, m);
 		bigLeftShift(x, normbits, x);
@@ -869,8 +875,8 @@ _TYPE( void ) bigMod(BigInt a,
 		bigsub(x, div, x);
 
 #if 0
-	printf("bigMod: x = "); bigprint(x);
-	printf("bigMod: div = "); bigprint(div);
+	printf("bigMod: x = (size %d) ", bigBits(x)); bigprint(x);
+	printf("bigMod: div = (size %d) ", bigBits(div)); bigprint(div);
 #endif
 	
 	/* In this loop, q is the estimated quotient */
@@ -878,7 +884,7 @@ _TYPE( void ) bigMod(BigInt a,
 		xp = NUM(x);
 		bigrightshift(div, div, 1); /* shift right by 32 bits */
 		if (xp[i] == ms)
-			q = (unsigned long)0xFFFFFFFF;
+			q = (Ulong)0xFFFFFFFF;
 		else {
 			NUM(tmp)[1] = xp[i];
 			NUM(tmp)[0] = xp[i-1];
@@ -894,11 +900,12 @@ _TYPE( void ) bigMod(BigInt a,
 
 		bigSubtract(x, tmp, x);
 	}
-	
+
 	if (changed) {
 		bigRightShift(m, normbits, m);
 		bigRightShift(x, normbits, x);
 	}
+
 	SIGN(x) = savesign;
 	
 }
@@ -959,7 +966,7 @@ _TYPE( void ) bigDivide(BigInt a,
 	changed = 0;
 	normbits = 0;
 
-	if (NUM(m)[LENGTH(m)-1] < (unsigned long)0x80000000) {
+	if (NUM(m)[LENGTH(m)-1] < (Ulong)0x80000000) {
 		normbits = (32-msb(NUM(m)[LENGTH(m)-1]));
 		bigLeftShift(m, normbits, div);
 		bigLeftShift(x, normbits, x);
@@ -991,7 +998,7 @@ _TYPE( void ) bigDivide(BigInt a,
 		bigrightshift(div, div, 1);
 
 		if (xp[i] == ms) {
-			q = (unsigned long)0xFFFFFFFF;
+			q = (Ulong)0xFFFFFFFF;
 		}
 		else {
 

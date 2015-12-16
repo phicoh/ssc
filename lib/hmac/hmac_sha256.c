@@ -6,6 +6,8 @@ Message Authentication Code based on the Hash function SHA-256 (RFC-2104)
 Created:	Dec 2004 by Philip Homburg <philip@f-mnx.phicoh.com>
 */
 
+#include "os.h"
+
 #include <string.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -92,5 +94,5 @@ void hmac_sha256_cleanup(struct hmac_sha256_ctx *ctxp)
 }
 
 /*
- * $PchId: hmac_sha256.c,v 1.1 2005/05/03 13:30:07 philip Exp $
+ * $PchId: hmac_sha256.c,v 1.2 2011/12/27 22:25:28 philip Exp $
  */

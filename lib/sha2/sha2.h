@@ -77,7 +77,59 @@ typedef u64_t u_int64_t;	/* 8-bytes (64-bits) */
 #define SHA2_BIG_ENDIAN		0x01020204
 #define bcopy(s,d,l)	(memmove((d),(s),(l)))
 #define bzero(d,l)	(memset((d),'\0',(l)))
+#endif /* __minix */
+
+#ifdef ARCH_LINUX
+#include "../../include/os.h"
+
+/* Should figure out byteorder on Linux */
+#define SHA2_BYTE_ORDER		SHA2_LITTLE_ENDIAN
+#define SHA2_LITTLE_ENDIAN	0x04030201
+#define SHA2_BIG_ENDIAN		0x01020204
+
+#endif /* ARCH_LINUX */
+
+#ifdef ARCH_SOLARIS
+#include "../../include/os.h"
+
+/* Should figure out byteorder on Solaris */
+#define SHA2_BYTE_ORDER		SHA2_BIG_ENDIAN
+#define SHA2_LITTLE_ENDIAN	0x04030201
+#define SHA2_BIG_ENDIAN		0x01020204
+
+#ifndef __P
+#define __P(x) x
 #endif
+
+#endif /* ARCH_SOLARIS */
+
+#ifdef ARCH_BSD
+#include "../../include/os.h"
+
+/* Should figure out byteorder on BSD */
+#define SHA2_BYTE_ORDER		SHA2_LITTLE_ENDIAN
+#define SHA2_LITTLE_ENDIAN	0x04030201
+#define SHA2_BIG_ENDIAN		0x01020204
+
+#ifndef __P
+#define __P(x) x
+#endif
+
+#endif /* ARCH_BSD */
+
+#ifdef ARCH_OSX
+#include "../../include/os.h"
+
+/* Should figure out byteorder on OSX */
+#define SHA2_BYTE_ORDER		SHA2_LITTLE_ENDIAN
+#define SHA2_LITTLE_ENDIAN	0x04030201
+#define SHA2_BIG_ENDIAN		0x01020204
+
+#ifndef __P
+#define __P(x) x
+#endif
+
+#endif /* ARCH_OSX */
 
 /*** SHA-256/384/512 Context Structures *******************************/
 /* NOTE: If your architecture does not define either u_intXX_t types or
@@ -164,5 +216,5 @@ char* SHA512_Data __P((const u_int8_t*, size_t, char[SHA512_DIGEST_STRING_LENGTH
 
 
 /*
- * $PchId: sha2.h,v 1.1 2005/05/06 20:49:13 philip Exp $
+ * $PchId: sha2.h,v 1.3 2012/01/27 15:55:22 philip Exp $
  */

@@ -3,6 +3,7 @@
 #CC=gcc -O9
 OBJ=cbcmac_aes.o
 AR=ar
+CFLAGS=${ARCH_FLAGS}
 
 all:	../libcrypt.a
 
@@ -13,4 +14,4 @@ clean:
 	$(AR) r $@ $(OBJ)
 
 #
-# $PchId: Makefile,v 1.1 2005/05/03 13:38:48 philip Exp $
+# $PchId: Makefile,v 1.2 2011/12/28 11:47:04 philip Exp $

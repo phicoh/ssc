@@ -3,6 +3,7 @@
 
 
 #include <stdio.h>	
+#include <stdint.h>	
 
 /*	#include "ansi.h"	*/
 /*	prototyping macro	*/
@@ -66,7 +67,7 @@ _TYPE( void ) clib_memzero P((unsigned char *src, int len));
 /* The default radix length is 32 bits so that a bignum contains an array of
  * unsigned longs.
  */
-typedef unsigned long Ulong;
+typedef uint32_t Ulong;
 typedef unsigned short Ushort;
 typedef Ulong NumType;
 #define UlongBits 32

@@ -83,7 +83,8 @@ _TYPE( int ) bigsprint(BigInt big,
 	len = 0;
 	
 	for (i=LENGTH(big)-1; i>=0; i--) {
-		len += (int)sprintf((char *)bp, "%08lx", NUM(big)[i]);
+		len += (int)sprintf((char *)bp, "%08lx",
+			(unsigned long)NUM(big)[i]);
 		bp += 8;
 	}
 	*bp = '\0';
@@ -106,9 +107,9 @@ _TYPE( void ) fBigPrint(BigInt a,
 	if (SIGN(a) == NEG)
 		(void) fprintf(fp, "-");
 	
-	(void) fprintf(fp, "%lx", NUM(a)[LENGTH(a)-1]);
+	(void) fprintf(fp, "%lx", (unsigned long)NUM(a)[LENGTH(a)-1]);
 	for (i = (int)(LENGTH(a) - 2); i >= 0; --i)
-		(void) fprintf(fp, "%08lx", NUM(a)[i]);
+		(void) fprintf(fp, "%08lx", (unsigned long)NUM(a)[i]);
 	(void) fprintf(fp, "\n");
 }
 

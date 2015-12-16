@@ -3,6 +3,7 @@
 #CC=gcc -O9
 BIN=/usr/local/bin
 INSTALL=install
+CFLAGS=${ARCH_FLAGS}
 
 all:	rsagen ssc_runas tcpmux
 
@@ -21,19 +22,19 @@ TCPMUX_OBJ=	tcpmux.o $(TCPMUX_OS)
 TCPMUX_LIB=	../lib/libos.a
 
 rsagen:	$(RSAGEN_OBJ) $(RSAGEN_LIB)
-	$(CC) -o $@ $(RSAGEN_OBJ) $(RSAGEN_LIB)
+	$(CC) -o $@ $(LDFLAGS) $(RSAGEN_OBJ) $(RSAGEN_LIB)
 
 $(BIN)/rsagen: rsagen
 	$(INSTALL) rsagen $@
 
 ssc_runas:	$(SSC_RUNAS_OBJ) $(SSC_RUNAS_LIB)
-	$(CC) -o $@ $(SSC_RUNAS_OBJ) $(SSC_RUNAS_LIB)
+	$(CC) -o $@ $(LDFLAGS) $(SSC_RUNAS_OBJ) $(SSC_RUNAS_LIB)
 
 $(BIN)/ssc_runas: ssc_runas
 	$(INSTALL) ssc_runas $@
 
 tcpmux:	$(TCPMUX_OBJ) $(TCPMUX_LIB)
-	$(CC) -o $@ $(TCPMUX_OBJ) $(TCPMUX_LIB)
+	$(CC) -o $@ $(LDFLAGS) $(TCPMUX_OBJ) $(TCPMUX_LIB)
 
 $(BIN)/tcpmux: tcpmux
 	$(INSTALL) tcpmux $@
@@ -44,4 +45,4 @@ clean:
 	rm -f tcpmux $(TCPMUX_OBJ)
 
 #
-# $PchId: Makefile,v 1.2 2005/06/01 10:19:55 philip Exp $
+# $PchId: Makefile,v 1.3 2011/12/28 11:45:40 philip Exp $
