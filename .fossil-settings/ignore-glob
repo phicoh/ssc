@@ -1,0 +1,2 @@
+*.o util/tcpmux util/ssc_runas util/rsagen ssctelnet/ssctelnet sscserver/sscserver sscrshd/sscrshd sscrsh/sscrsh sscrcpd/sscrcpd sscrcp/sscrcp sscclient/sscclient lib/libos.a lib/libcrypt.a
+
