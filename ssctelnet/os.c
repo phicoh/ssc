@@ -12,7 +12,7 @@ Created:	Dec 2011 by Philip Homburg
 
 #ifdef ARCH_LINUX
 
-#include "os_linux.c"
+#include "os_posix.c"
 
 #endif /* ARCH_LINUX */
 

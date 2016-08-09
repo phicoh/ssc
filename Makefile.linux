@@ -4,7 +4,7 @@ ARCH_FLAGS=-DARCH_LINUX
 ARCH_SUBDIR=os/linux
 
 SUBDIRS=lib sscclient sscserver sscrcp sscrcpd sscrsh sscrshd \
-	ssctelnet ssctelnetd util
+	ssctelnet util
 all:	subdirs
 
 install:
