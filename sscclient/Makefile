@@ -19,7 +19,7 @@ sscclient:	$(SSCCLIENT_OBJ) $(SSCCLIENT_LIB)
 $(BIN)/sscclient:	sscclient
 	$(INSTALL) sscclient $@
 
-os.o: os_minix.c os_linux.c os_posix.c
+os.o: os_minix.c os_posix.c
 
 clean:
 	rm -f sscclient $(SSCCLIENT_OBJ)
