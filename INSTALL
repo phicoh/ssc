@@ -18,6 +18,14 @@ rsagen -h 2048
 
 5 Start daemon as
 
+(On a system with inetd that supports tcpmux)
+tcpmux  stream  tcp     nowait  root    internal
+tcpmux/+sscp stream tcp nowait  root    /usr/local/bin/sscserver sscserver
+
+(On a system with inetd without tcpmux)
+tcpmux  stream  tcp     nowait  root    /usr/local/bin/tcpmux tcpmux sscp /usr/local/bin/sscserver sscserver
+
+(Without inetd)
 tcpd tcpmux tcpmux sscp /usr/local/bin/sscserver sscserver
 
 
