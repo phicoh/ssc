@@ -58,8 +58,6 @@ size_t strlcpy(char *_dst, const char *_src, size_t _siz);
 size_t strlcat(char *_dst, const char *_src, size_t _siz);
 size_t strlcpy(char *_dst, const char *_src, size_t _siz);
 
-typedef int U16_t;
-
 #endif /* __minix */
 
 #ifdef ARCH_LINUX

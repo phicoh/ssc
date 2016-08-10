@@ -13,17 +13,25 @@ Created:	Feb 2005 by Philip Homburg
 #include <fcntl.h>
 #include <signal.h>
 #include <termios.h>
+#include <sys/ioctl.h>
+
+/* Find out if this Minix-vmd system supports IPv6 or not. */
+#ifdef NWIOSIP6OPT
+#define HAS_IPV6	1
+#endif
+
 #include <net/hton.h>
 #include <net/netlib.h>
 #include <net/gen/in.h>
+#ifdef HAS_IPV6
 #include <net/gen/in6.h>
 #include <net/gen/ins.h>
+#endif
 #include <net/gen/inet.h>
 #include <net/gen/netdb.h>
 #include <net/gen/socket.h>
 #include <net/gen/tcp.h>
 #include <net/gen/tcp_io.h>
-#include <sys/ioctl.h>
 
 #define CHILD_TO	30	/* Check this often whether the child is 
 				 * still alive.
@@ -44,67 +52,22 @@ int tcp_connect(char *servername)
 	char *tcp_device, *servicename;
 	struct addrinfo *res, *aip;
 	int e, i, r, fd, connected;
+	nwio_tcpconf_t tcp4conf;
+#ifdef HAS_IPV6
 	struct sockaddr_in sin4;
 	struct sockaddr_in6 sin6;
-	nwio_tcpconf_t tcp4conf;
 	nwio_tcp6conf_t tcp6conf;
-	nwio_tcpcl_t tcpcl;
 	struct addrinfo hints;
+#else
+	ipaddr_t hostaddr;
+	tcpport_t remport;
+	struct hostent *he;
+	struct servent *se;
+#endif
+	nwio_tcpcl_t tcpcl;
 
 	tcp_device= getenv("TCP_DEVICE");
 	if (tcp_device == NULL) tcp_device= TCP_DEVICE;
-
-#if 0
-	he= gethostbyname(servername);
-	if (he == NULL)
-		fatal("unknown hostname '%s'", servername);
-	if (he->h_addrtype != AF_INET)
-		fatal("bad address family for '%s'", servername);
-	assert(he->h_length == sizeof(hostaddr));
-
-	fd= -1;	/* lint */
-	for (i= 0; he->h_addr_list[i] != NULL; i++)
-	{
-		memcpy(&hostaddr, he->h_addr_list[i], sizeof(hostaddr));
-
-		fd= open(tcp_device, O_RDWR);
-		if (fd == -1)
-			return fd;
-		tcpconf.nwtc_flags= NWTC_EXCL | NWTC_LP_SEL | NWTC_SET_RA |
-			NWTC_SET_RP;
-		tcpconf.nwtc_remaddr= hostaddr;
-		tcpconf.nwtc_remport= remport;
-		if (ioctl(fd, NWIOSTCPCONF, &tcpconf) == -1)
-		{
-			e= errno;
-			close(fd);
-			fatal("NWIOSTCPCONF failed for '%s': %s",
-				tcp_device, strerror(errno));
-		}
-		tcpcl.nwtcl_flags= 0;
-		if (ioctl(fd, NWIOTCPCONN, &tcpcl) == -1)
-		{
-			e= errno;
-			close(fd);
-			if (he->h_addr_list[i+1] != NULL)
-			{
-				/* More addresses, ignore the error */
-				fprintf(stderr,
-				"Warning: unable to connect to %s:%u: %s\n",
-					inet_ntoa(hostaddr), ntohs(remport),
-					strerror(e));
-				continue;
-			}
-			/* Last address, fatal error */
-			fatal("cannot connect to %s:%u: %s",
-				inet_ntoa(hostaddr), ntohs(remport),
-				strerror(e));
-		}
-
-		/* Success */
-		break;
-	}
-#endif
 
 #if USE_TCPMUX
 	servicename= "tcpmux";
@@ -112,6 +75,7 @@ int tcp_connect(char *servername)
 	servicename= SSC_PROTO_NAME;
 #endif
 
+#ifdef HAS_IPV6
 	memset(&hints, '\0', sizeof(hints));
 	hints.ai_socktype= SOCK_STREAM;
 
@@ -201,6 +165,66 @@ int tcp_connect(char *servername)
 			strerror(errno));
 	}	
 	freeaddrinfo(res);
+
+#else /* !HAS_IPV6 */
+
+	se= getservbyname(servicename, "tcp");
+	if (se == NULL)
+		fatal("unable to lookup port for service '%s'\n", servicename);
+	remport= se->s_port;
+
+	he= gethostbyname(servername);
+	if (he == NULL)
+		fatal("unknown hostname '%s'", servername);
+	if (he->h_addrtype != AF_INET)
+		fatal("bad address family for '%s'", servername);
+	assert(he->h_length == sizeof(hostaddr));
+
+	fd= -1;	/* lint */
+	for (i= 0; he->h_addr_list[i] != NULL; i++)
+	{
+		memcpy(&hostaddr, he->h_addr_list[i], sizeof(hostaddr));
+
+		fd= open(tcp_device, O_RDWR);
+		if (fd == -1)
+			return fd;
+		tcp4conf.nwtc_flags= NWTC_EXCL | NWTC_LP_SEL | NWTC_SET_RA |
+			NWTC_SET_RP;
+		tcp4conf.nwtc_remaddr= hostaddr;
+		tcp4conf.nwtc_remport= remport;
+		if (ioctl(fd, NWIOSTCPCONF, &tcp4conf) == -1)
+		{
+			e= errno;
+			close(fd);
+			fatal("NWIOSTCPCONF failed for '%s': %s",
+				tcp_device, strerror(errno));
+		}
+		tcpcl.nwtcl_flags= 0;
+		if (ioctl(fd, NWIOTCPCONN, &tcpcl) == -1)
+		{
+			e= errno;
+			close(fd);
+			if (he->h_addr_list[i+1] != NULL)
+			{
+				/* More addresses, ignore the error */
+				fprintf(stderr,
+				"Warning: unable to connect to %s:%u: %s\n",
+					inet_ntoa(hostaddr), ntohs(remport),
+					strerror(e));
+				continue;
+			}
+			/* Last address, fatal error */
+			fatal("cannot connect to %s:%u: %s",
+				inet_ntoa(hostaddr), ntohs(remport),
+				strerror(e));
+		}
+
+		/* Success */
+		break;
+	}
+
+
+#endif /* HAS_IPV6 */
 
 	if (!connected)
 		exit(1);
