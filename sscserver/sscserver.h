@@ -37,7 +37,7 @@ int readall(void *buf, size_t size);
 int writeall(void *buf, size_t size);
 int sksc_c_readall(void *data, size_t len);
 int sksc_s_writeall(void *data, size_t len);
-void u16_to_be(U16_t v, u8_t buf[2]);
+void u16_to_be(u16_t v, u8_t buf[2]);
 void u32_to_be(u32_t v, u8_t buf[4]);
 u16_t u16_from_be(u8_t buf[2]);
 u32_t u32_from_be(u8_t buf[4]);
@@ -61,5 +61,5 @@ extern u32_t maxmsglen;	/* Maximum number of plaintext bytes in a SKSC
 extern char *sfile_name;
 
 /*
- * $PchId: sscserver.h,v 1.1 2005/05/25 14:03:57 philip Exp $
+ * $PchId: sscserver.h,v 1.1 2005/05/25 14:03:57 philip Exp philip $
  */

@@ -56,7 +56,7 @@ static int wildcard(char *str);
 static int readall(void *buf, size_t size);
 static int writeall(void *buf, size_t size);
 static int fd_writeall(int fd, void *buf, size_t size);
-static void u16_to_be(U16_t v, u8_t buf[2]);
+static void u16_to_be(u16_t v, u8_t buf[2]);
 static void u32_to_be(u32_t v, u8_t buf[4]);
 static u16_t u16_from_be(u8_t buf[2]);
 static u32_t u32_from_be(u8_t buf[4]);
@@ -1166,7 +1166,7 @@ static int fd_writeall(int fd, void *buf, size_t size)
 	return size;
 }
 
-static void u16_to_be(U16_t v, u8_t buf[2])
+static void u16_to_be(u16_t v, u8_t buf[2])
 {
 	buf[0]= ((v >> 8) & 0xff);
 	buf[1]= (v & 0xff);
@@ -1227,5 +1227,5 @@ static void usage(void)
 }
 
 /*
- * $PchId: sscrcp.c,v 1.2 2005/06/01 10:17:06 philip Exp $
+ * $PchId: sscrcp.c,v 1.2 2005/06/01 10:17:06 philip Exp philip $
  */

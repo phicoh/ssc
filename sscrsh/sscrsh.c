@@ -35,7 +35,7 @@ static void do_usr1(int sig);
 static void do_usr2(int sig);
 static int readall(void *buf, size_t size);
 static int writeall(void *buf, size_t size);
-static void u16_to_be(U16_t v, u8_t buf[2]);
+static void u16_to_be(u16_t v, u8_t buf[2]);
 static void u32_to_be(u32_t v, u8_t buf[4]);
 static u16_t u16_from_be(u8_t buf[2]);
 static u32_t u32_from_be(u8_t buf[4]);
@@ -448,7 +448,7 @@ static int writeall(void *buf, size_t size)
 	return size;
 }
 
-static void u16_to_be(U16_t v, u8_t buf[2])
+static void u16_to_be(u16_t v, u8_t buf[2])
 {
 	buf[0]= ((v >> 8) & 0xff);
 	buf[1]= (v & 0xff);
@@ -512,5 +512,5 @@ static void usage(void)
 }
 
 /*
- * $PchId: sscrsh.c,v 1.2 2005/06/01 10:14:19 philip Exp $
+ * $PchId: sscrsh.c,v 1.2 2005/06/01 10:14:19 philip Exp philip $
  */

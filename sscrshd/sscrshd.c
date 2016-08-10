@@ -40,7 +40,7 @@ static void do_alarm(int sig);
 static void do_usr2(int sig);
 static int readall(void *buf, size_t size);
 static ssize_t writeall(void *buf, size_t size);
-static void u16_to_be(U16_t v, u8_t buf[2]);
+static void u16_to_be(u16_t v, u8_t buf[2]);
 static void u32_to_be(u32_t v, u8_t buf[4]);
 static u16_t u16_from_be(u8_t buf[2]);
 static u32_t u32_from_be(u8_t buf[4]);
@@ -504,7 +504,7 @@ static ssize_t writeall(void *buf, size_t size)
 	return size;
 }
 
-static void u16_to_be(U16_t v, u8_t buf[2])
+static void u16_to_be(u16_t v, u8_t buf[2])
 {
 	buf[0]= ((v >> 8) & 0xff);
 	buf[1]= (v & 0xff);
@@ -556,5 +556,5 @@ static void fatal_kill(char *fmt, ...)
 }
 
 /*
- * $PchId: sscrshd.c,v 1.2 2011/12/27 22:56:03 philip Exp $
+ * $PchId: sscrshd.c,v 1.2 2011/12/27 22:56:03 philip Exp philip $
  */

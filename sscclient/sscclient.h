@@ -32,7 +32,7 @@ int writeall(void *buf, size_t size);
 int sksc_s_readall(void *buf, size_t size);
 int sksc_c_writeall(void *buf, size_t size);
 char *read_line(FILE *file);
-void u16_to_be(U16_t v, u8_t buf[2]);
+void u16_to_be(u16_t v, u8_t buf[2]);
 void u32_to_be(u32_t v, u8_t buf[4]);
 u16_t u16_from_be(u8_t buf[2]);
 u32_t u32_from_be(u8_t buf[4]);
@@ -53,5 +53,5 @@ extern u8_t sksc_c_outbuf[4 + S_CPP_MAXMSGLEN + SKSC_OVERHEAD];
 extern u8_t sksc_s_inbuf[4 + S_CPP_MAXMSGLEN + SKSC_OVERHEAD];
 
 /*
- * $PchId: sscclient.h,v 1.2 2011/12/29 20:24:35 philip Exp $
+ * $PchId: sscclient.h,v 1.2 2011/12/29 20:24:35 philip Exp philip $
  */

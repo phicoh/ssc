@@ -433,7 +433,7 @@ char *read_line(FILE *file)
 	return line;
 }
 
-void u16_to_be(U16_t v, u8_t buf[2])
+void u16_to_be(u16_t v, u8_t buf[2])
 {
 	buf[0]= ((v >> 8) & 0xff);
 	buf[1]= (v & 0xff);
@@ -1198,5 +1198,5 @@ static void usage(void)
 
 
 /*
- * $PchId: sscclient.c,v 1.4 2011/12/29 20:33:20 philip Exp $
+ * $PchId: sscclient.c,v 1.4 2011/12/29 20:33:20 philip Exp philip $
  */
