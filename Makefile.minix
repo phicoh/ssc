@@ -19,7 +19,7 @@ subdirs:
 	done
 
 clean:
-	for i in $(SUBDIRS); do (echo $$i:; cd $$i && make clean); done
+	for i in $(SUBDIRS); do (echo $$i:; cd $$i && make ARCH_SUBDIR="${ARCH_SUBDIR}" clean); done
 
 #
 # $PchId: Makefile.minix,v 1.2 2011/12/29 20:35:48 philip Exp $
