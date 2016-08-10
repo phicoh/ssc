@@ -37,9 +37,9 @@ void do_inout(int p_in, int p_out)
 		tcgetattr(0, &termios);
 		screen(p_in, p_out);
 		ppid= getppid();
+		tcsetattr(0, TCSANOW, &termios);
 		if (ppid != -1)
 			kill(ppid, SIGUSR2);
-		tcsetattr(0, TCSANOW, &termios);
 		break;
 	case -1:
 		fatal("fork failed: %s\r", strerror(errno));
@@ -245,5 +245,5 @@ static void do_usr2(int sig)
 }
 
 /*
- * $PchId: os_minix.c,v 1.2 2012/01/27 15:56:37 philip Exp $
+ * $PchId: os_minix.c,v 1.2 2012/01/27 15:56:37 philip Exp philip $
  */
