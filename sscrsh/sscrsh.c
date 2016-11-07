@@ -46,7 +46,7 @@ static void usage(void);
 int main(int argc, char *argv[])
 {
 	int c;
-	char *hostname, *options, *user;
+	char *p, *hostname, *options, *user;
 	int n_flag;
 	char *l_arg, *o_arg;
 
@@ -78,11 +78,28 @@ int main(int argc, char *argv[])
 	if (optind >= argc)
 		usage();
 	hostname= argv[optind++];
-	if (optind >= argc)
+
+	if (optind == argc)
+	{
+		/* We want remote login. Exec ssctelnet */
+		execvp("ssctelnet", argv);
+		fatal("execvp of ssctelnet failed: %s", strerror(errno));
+	}
+
+	if (optind > argc)	/* Can this actually happen? */
 		usage();
 
 	user= l_arg;
 	options= o_arg;
+
+	/* Parse user@host */
+	p= strchr(hostname, '@');
+	if (p)
+	{
+		*p= '\0';
+		user= hostname;
+		hostname= p+1;
+	}
 
 	start_client(hostname, user, options);
 	read_greeting();
@@ -507,7 +524,7 @@ static void fatal_kill(char *fmt, ...)
 static void usage(void)
 {
 	fprintf(stderr, "Usage: sscrsh [-l <rem-user>] [-n] [-o <options>]\n"
-		"\t\t<hostname> <command> [<string>]...\n");
+		"\t\t[<rem-user>@]<hostname> [<command> [<string>]...]\n");
 	exit(1);
 }
 
