@@ -239,9 +239,18 @@ static void do_inout(void)
 	char *cp;
 	void *buf;
 	struct sscrsh_data *data_hdrp;
+	struct sigaction sa;
 
-	signal(SIGUSR1, do_usr1);
-	signal(SIGUSR2, do_usr2);
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags= 0;
+	sa.sa_handler= do_usr1;
+	sigaction(SIGUSR1, &sa, NULL);
+
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags= 0;
+	sa.sa_handler= do_usr2;
+	sigaction(SIGUSR2, &sa, NULL);
+
 	child_pid= fork();
 	if (child_pid == -1)
 		fatal("fork failed: %s", strerror(errno));
