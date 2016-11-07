@@ -8,6 +8,7 @@ Created:	March 2005 by Philip Homburg for NAH6
 
 #include "../include/os.h"
 #include "../include/prot_rsh.h"
+#include "../include/sscversion.h"
 
 #define SHELL "/bin/sh"
 #if 0 /* For Android: (should be moved to os.h) */
@@ -46,15 +47,35 @@ static u16_t u16_from_be(u8_t buf[2]);
 static u32_t u32_from_be(u8_t buf[4]);
 static void fatal(char *fmt, ...);
 static void fatal_kill(char *fmt, ...);
+static void usage(void);
 
 int main(int argc, char *argv[])
 {
-	int fd;
+	int c, fd;
 	char *home;
 
 	openlog("sscrshd", LOG_CONS, LOG_AUTH);
 
 	(progname=strrchr(argv[0], '/')) ? progname++ : (progname=argv[0]);
+
+	while (c=getopt(argc, argv, "?V"), c != -1)
+	{
+		switch(c)
+		{
+		case '?':
+			usage();
+		case 'V':
+			fprintf(stderr, "%s: version %s\n", 
+				progname, sscversion);
+			exit(1);
+		default:
+			fatal("getopt failed: '%c'", c);
+		}
+	}
+
+	if (optind != argc)
+		usage();
+
 
 	/* Change to the user's home directory. Ignore errors. */
 	home= getenv("HOME");
@@ -552,6 +573,12 @@ static void fatal_kill(char *fmt, ...)
 	kill(0, SIGHUP);
 
 	/* In case we didn't die */
+	exit(1);
+}
+
+static void usage(void)
+{
+	fprintf(stderr, "Usage:\tsscrshd [-V]\n");
 	exit(1);
 }
 

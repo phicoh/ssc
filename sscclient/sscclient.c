@@ -12,6 +12,7 @@ Created:	Feb 2005 by Philip Homburg for NAH6
 #include "../lib/sha2/sha2.h"
 #include "../lib/sksc/sksc.h"
 #include "../include/protocol.h"
+#include "../include/sscversion.h"
 #include "sscclient.h"
 
 u32_t maxmsglen;
@@ -89,7 +90,7 @@ int main(int argc, char *argv[])
 
 	b_flag= 0;
 	l_arg= o_arg= NULL;
-	while (c= getopt(argc, argv, "bl:o:?"), c != -1)
+	while (c= getopt(argc, argv, "bl:o:V?"), c != -1)
 	{
 		switch(c)
 		{
@@ -102,6 +103,8 @@ int main(int argc, char *argv[])
 		case 'o':
 			o_arg= optarg;
 			break;
+		case 'V':
+			fatal("version %s", sscversion);
 		case '?':
 			usage();
 		default:
@@ -1192,7 +1195,7 @@ static void do_options(char *list)
 static void usage(void)
 {
 	fprintf(stderr,
-"Usage: sscclient [-b] [-l <rem-user>] [-o <options>] <hostname> <service>\n");
+"Usage: sscclient [-bV] [-l <rem-user>] [-o <options>] <hostname> <service>\n");
 	exit(1);
 }
 

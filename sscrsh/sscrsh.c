@@ -8,6 +8,7 @@ Created:	March 2005 by Philip Homburg for NAH6
 
 #include "../include/os.h"
 #include "../include/prot_rsh.h"
+#include "../include/sscversion.h"
 
 #define SSCCLIENT_PATH	"/usr/local/sbin/sscclient"
 
@@ -55,7 +56,7 @@ int main(int argc, char *argv[])
 	n_flag= 0;
 	l_arg= NULL;
 	o_arg= NULL;
-	while (c=getopt(argc, argv, "l:no:?"), c != -1)
+	while (c=getopt(argc, argv, "l:no:V?"), c != -1)
 	{
 		switch(c)
 		{
@@ -70,6 +71,8 @@ int main(int argc, char *argv[])
 		case 'o':
 			o_arg= optarg;
 			break;
+		case 'V':
+			fatal("version %s", sscversion);
 		default:
 			fatal("getopt failed: '%c'", c);
 		}
@@ -523,7 +526,7 @@ static void fatal_kill(char *fmt, ...)
 
 static void usage(void)
 {
-	fprintf(stderr, "Usage: sscrsh [-l <rem-user>] [-n] [-o <options>]\n"
+	fprintf(stderr, "Usage: sscrsh [-nV] [-l <rem-user>] [-o <options>]\n"
 		"\t\t[<rem-user>@]<hostname> [<command> [<string>]...]\n");
 	exit(1);
 }
