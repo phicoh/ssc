@@ -1218,7 +1218,7 @@ static void fatal(char *fmt, ...)
 static void usage(void)
 {
 	fprintf(stderr,
-		"Usage:\tsscrsh [-o <options>] [-p] [user@]<hostname>\n");
+		"Usage:\tsscrcp [-o <options>] [-p] [user@]<hostname>\n");
 	fprintf(stderr,
 "\tsscrsh [-o options] [-p] [user@]<hostname>:<filename> <file/dir>\n");
 	fprintf(stderr,
