@@ -10,6 +10,7 @@ Created:	Feb 2005 by Philip Homburg for NAH6
 #include "../lib/mp/libcrypt.h"
 #include "../lib/sha2/sha2.h"
 #include "../lib/rsa/rsa.h"
+#include "../include/sscversion.h"
 
 #define SSC_DIR		".ssc"
 #define KEY_PRIV	"key-priv"
@@ -40,7 +41,7 @@ int main(int argc, char *argv[])
 	(progname=strrchr(argv[0],'/')) ? progname++ : (progname=argv[0]);
 
 	h_flag= 0;
-	while(c= getopt(argc, argv, "?h"), c != -1)
+	while(c= getopt(argc, argv, "?hV"), c != -1)
 	{
 		switch(c)
 		{
@@ -49,6 +50,8 @@ int main(int argc, char *argv[])
 		case 'h':
 			h_flag= 1;
 			break;
+		case 'V':
+			fatal("version %s", sscversion);
 		default:
 			fatal("getopt failed: '%c'", c);
 		}
@@ -202,7 +205,7 @@ static void fatal(char *fmt, ...)
 static void usage(void)
 {;
 	fprintf(stderr,
-	"Usage: rsagen\t<modulus-length> <priv-key file> <pub-key file>\n"
+	"Usage: rsagen\t[-V] <modulus-length> <priv-key file> <pub-key file>\n"
 		"\t\t-h <modulus-length>\n");
 	exit(1);
 }

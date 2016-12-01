@@ -1,7 +1,7 @@
 # Makefile for lib/misc
 
 #CC=gcc -O9
-OBJ=alloc.o
+OBJ=alloc.o ../../sscversion.o
 AR=ar
 CFLAGS=${ARCH_FLAGS}
 

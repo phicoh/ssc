@@ -11,6 +11,7 @@ Created:	Feb 2005 by Philip Homburg for NAH6
 #include "../lib/sha2/sha2.h"
 #include "../lib/sksc/sksc.h"
 #include "../include/protocol.h"
+#include "../include/sscversion.h"
 #include "sscserver.h"
 
 #if 1
@@ -66,12 +67,16 @@ int main(int argc, char *argv[])
 
 	(progname=strrchr(argv[0], '/')) ? progname++ : (progname=argv[0]);
 
-	while (c= getopt(argc, argv, "?"), c != -1)
+	while (c= getopt(argc, argv, "V?"), c != -1)
 	{
 		switch(c)
 		{
 		case '?':
 			usage();
+		case 'V':
+			fprintf(stderr, "%s: version %s\n", 
+				progname, sscversion);
+			exit(1);
 		default:
 			fatal("getopt failed: '%c'", c);
 		}
@@ -430,7 +435,7 @@ static void init_sksc(SHA256_CTX *dhsec_ctx)
 
 static void usage(void)
 {
-	fprintf(stderr, "Usage: sscserver\n");
+	fprintf(stderr, "Usage: sscserver [-V]\n");
 	exit(1);
 }
 

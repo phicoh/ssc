@@ -15,6 +15,7 @@ Created:	May 2005 by Philip Homburg for NAH6
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 
+#include "../include/sscversion.h"
 #include "../include/telnet.h"
 
 #define NMAX	30
@@ -139,13 +140,14 @@ int main(argc, argv)
 
 	prog_name= argv[0];
 	b_flag= d_flag= 0;
-	while (c= getopt(argc, argv, "?bd"), c != -1)
+	while (c= getopt(argc, argv, "?bdV"), c != -1)
 	{
 		switch(c)
 		{
 		case '?':	usage();
 		case 'b':	b_flag= 1;	break;
 		case 'd':	d_flag= 1;	break;
+		case 'V': fatal("version %s", sscversion);
 		default:
 			fprintf(stderr, "%s: getopt failed : '%c'\n",
 				prog_name, c);
@@ -1292,7 +1294,7 @@ static void fatal(char *fmt, ...)
 
 static void usage(void)
 {
-	fprintf(stderr, "Usage: ssctelnetd [-bd] <pty-fd> <tty-name>\n");
+	fprintf(stderr, "Usage: ssctelnetd [-bdV] <pty-fd> <tty-name>\n");
 	exit(1);
 }
 

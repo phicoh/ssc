@@ -7,6 +7,7 @@ Created:	March 2005 by Philip Homburg for NAH6
 */
 
 #include "../include/os.h"
+#include "../include/sscversion.h"
 #include "../include/telnet.h"
 
 #include <termios.h>
@@ -44,12 +45,12 @@ int main(int argc, char *argv[])
 {
 	int c, p_in, p_out;
 	char *hostname, *user, *options;
-	char *e_arg, *l_arg, *o_arg;
+	char *p, *e_arg, *l_arg, *o_arg;
 
 	(prog_name=strrchr(argv[0],'/')) ? prog_name++ : (prog_name=argv[0]);
 
 	e_arg= o_arg= l_arg= NULL;
-	while (c= getopt(argc, argv, "e:l:o:?"), c != -1)
+	while (c= getopt(argc, argv, "e:l:o:V?"), c != -1)
 	{
 		switch(c)
 		{
@@ -57,6 +58,7 @@ int main(int argc, char *argv[])
 		case 'e': e_arg= optarg; break;
 		case 'l': l_arg= optarg; break;
 		case 'o': o_arg= optarg; break;
+		case 'V': fatal("version %s", sscversion);
 		default:
 			fatal("getopt failed: '%c'", c);
 		}
@@ -80,6 +82,15 @@ int main(int argc, char *argv[])
 
 	user= l_arg;
 	options= o_arg;
+
+	/* Parse user@host */
+	p= strchr(hostname, '@');
+	if (p)
+	{
+		*p= '\0';
+		user= hostname;
+		hostname= p+1;
+	}
 
 	start_client(hostname, user, options, &p_in, &p_out);
 	read_greeting(p_in);
@@ -498,7 +509,8 @@ void fatal(char *fmt, ...)
 static void usage(void)
 {
 	fprintf(stderr,
-"Usage: ssctelnet [-e esc-char] [-l <rem-user>] [-o <options>] host\n");
+	"Usage: ssctelnet [-V] "
+	"[-e esc-char] [-l <rem-user>] [-o <options>] [<rem-user>@]host\n");
 	exit(1);
 }
 

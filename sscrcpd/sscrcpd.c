@@ -8,6 +8,7 @@ Created:	March 2005 by Philip Homburg for NAH6
 
 #include "../include/os.h"
 #include "../include/prot_rcp.h"
+#include "../include/sscversion.h"
 
 /* All mode bits */
 #define S_MODEMASK (S_ISUID|S_ISGID|S_ISVTX | S_IRWXU | S_IRWXG | S_IRWXO)
@@ -43,12 +44,32 @@ static u16_t u16_from_be(u8_t buf[2]);
 static u32_t u32_from_be(u8_t buf[4]);
 static void error(char *fmt, ...);
 static void fatal(char *fmt, ...);
+static void usage(void);
 
 int main(int argc, char *argv[])
 {
 	char *home;
+	int c;
 
 	(progname=strrchr(argv[0], '/')) ? progname++ : (progname=argv[0]);
+
+	while (c=getopt(argc, argv, "?V"), c != -1)
+	{
+		switch(c)
+		{
+		case '?':
+			usage();
+		case 'V':
+			fprintf(stderr, "%s: version %s\n", 
+				progname, sscversion);
+			exit(1);
+		default:
+			fatal("getopt failed: '%c'", c);
+		}
+	}
+
+	if (optind != argc)
+		usage();
 
 	/* Change to the user's home directory. Ignore errors. */
 	home= getenv("HOME");
@@ -746,6 +767,12 @@ static void fatal(char *fmt, ...)
 	vsyslog(LOG_ERR, fmt, ap);
 	va_end(ap);
 
+	exit(1);
+}
+
+static void usage(void)
+{
+	fprintf(stderr, "Usage:\tsscrcpd [-V]\n");
 	exit(1);
 }
 

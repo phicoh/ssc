@@ -8,6 +8,7 @@ Created:	March 2005 by Philip Homburg for NAH6
 
 #include "../include/os.h"
 #include "../include/prot_rcp.h"
+#include "../include/sscversion.h"
 #include "sscrcp.h"
 
 #define SSCCLIENT_PATH	"/usr/local/sbin/sscclient"
@@ -73,7 +74,7 @@ int main(int argc, char *argv[])
 
 	p_flag= 0;
 	o_arg= NULL;
-	while (c=getopt(argc, argv, "?o:p"), c != -1)
+	while (c=getopt(argc, argv, "?o:pV"), c != -1)
 	{
 		switch(c)
 		{
@@ -85,6 +86,8 @@ int main(int argc, char *argv[])
 		case 'p':
 			p_flag= 1;
 			break;
+		case 'V':
+			fatal("version %s", sscversion);
 		default:
 			fatal("getopt failed: '%c'", c);
 		}
@@ -1218,11 +1221,11 @@ static void fatal(char *fmt, ...)
 static void usage(void)
 {
 	fprintf(stderr,
-		"Usage:\tsscrsh [-o <options>] [-p] [user@]<hostname>\n");
+		"Usage:\tsscrcp [-V] [-o <options>] [-p] [user@]<hostname>\n");
 	fprintf(stderr,
-"\tsscrsh [-o options] [-p] [user@]<hostname>:<filename> <file/dir>\n");
+"\tsscrsp [-o options] [-p] [user@]<hostname>:<filename> <file/dir>\n");
 	fprintf(stderr,
-"\tsscrsh [-o options] [-p] <file1>... [user@]<hostname>:[<file/dir>]\n");
+"\tsscrsp [-o options] [-p] <file1>... [user@]<hostname>:[<file/dir>]\n");
 	exit(1);
 }
 

@@ -8,6 +8,7 @@ Created:	March 2005 by Philip Homburg for NAH6
 
 #include "../include/os.h"
 #include "../include/prot_rsh.h"
+#include "../include/sscversion.h"
 
 #define SSCCLIENT_PATH	"/usr/local/sbin/sscclient"
 
@@ -46,7 +47,7 @@ static void usage(void);
 int main(int argc, char *argv[])
 {
 	int c;
-	char *hostname, *options, *user;
+	char *p, *hostname, *options, *user;
 	int n_flag;
 	char *l_arg, *o_arg;
 
@@ -55,7 +56,7 @@ int main(int argc, char *argv[])
 	n_flag= 0;
 	l_arg= NULL;
 	o_arg= NULL;
-	while (c=getopt(argc, argv, "l:no:?"), c != -1)
+	while (c=getopt(argc, argv, "l:no:V?"), c != -1)
 	{
 		switch(c)
 		{
@@ -70,6 +71,8 @@ int main(int argc, char *argv[])
 		case 'o':
 			o_arg= optarg;
 			break;
+		case 'V':
+			fatal("version %s", sscversion);
 		default:
 			fatal("getopt failed: '%c'", c);
 		}
@@ -78,11 +81,28 @@ int main(int argc, char *argv[])
 	if (optind >= argc)
 		usage();
 	hostname= argv[optind++];
-	if (optind >= argc)
+
+	if (optind == argc)
+	{
+		/* We want remote login. Exec ssctelnet */
+		execvp("ssctelnet", argv);
+		fatal("execvp of ssctelnet failed: %s", strerror(errno));
+	}
+
+	if (optind > argc)	/* Can this actually happen? */
 		usage();
 
 	user= l_arg;
 	options= o_arg;
+
+	/* Parse user@host */
+	p= strchr(hostname, '@');
+	if (p)
+	{
+		*p= '\0';
+		user= hostname;
+		hostname= p+1;
+	}
 
 	start_client(hostname, user, options);
 	read_greeting();
@@ -219,9 +239,18 @@ static void do_inout(void)
 	char *cp;
 	void *buf;
 	struct sscrsh_data *data_hdrp;
+	struct sigaction sa;
 
-	signal(SIGUSR1, do_usr1);
-	signal(SIGUSR2, do_usr2);
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags= 0;
+	sa.sa_handler= do_usr1;
+	sigaction(SIGUSR1, &sa, NULL);
+
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags= 0;
+	sa.sa_handler= do_usr2;
+	sigaction(SIGUSR2, &sa, NULL);
+
 	child_pid= fork();
 	if (child_pid == -1)
 		fatal("fork failed: %s", strerror(errno));
@@ -506,8 +535,8 @@ static void fatal_kill(char *fmt, ...)
 
 static void usage(void)
 {
-	fprintf(stderr, "Usage: sscrsh [-l <rem-user>] [-n] [-o <options>]\n"
-		"\t\t<hostname> <command> [<string>]...\n");
+	fprintf(stderr, "Usage: sscrsh [-nV] [-l <rem-user>] [-o <options>]\n"
+		"\t\t[<rem-user>@]<hostname> [<command> [<string>]...]\n");
 	exit(1);
 }
 
