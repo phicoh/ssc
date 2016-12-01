@@ -8,4 +8,4 @@ Created:	Nov 2016 by Philip Homburg
 
 #include "include/sscversion.h"
 
-char sscversion[]="0.3 alpha";
+char sscversion[]="0.3 alpha 2";
